@@ -1,0 +1,9 @@
+bin/libs
+bin/room*
+bin/data/videos
+bin/*.app
+examples/*/bin
+obj
+.*.swp
+.*.swo
+.DS_Store
