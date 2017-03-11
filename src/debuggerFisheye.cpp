@@ -4,7 +4,7 @@
 
 //--------------------------------------------------------------
 debuggerFisheye::debuggerFisheye(int videoWidth, int videoHeight, char* name)
-    : processor(videoWidth, videoHeight, name) {
+    : transformer(videoWidth, videoHeight, name) {
     setupGui();
 
     ofDirectory dir = ofDirectory(ASSETS_PATH);
