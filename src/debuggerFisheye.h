@@ -2,9 +2,9 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
-#include "transformer.h"
+#include "processor.h"
 
-class debuggerFisheye: public transformer {
+class debuggerFisheye: public processor {
     public:
         debuggerFisheye(int videoWidth, int videoHeight, char* name);
 

@@ -4,7 +4,7 @@
 
 class processor {
     public:
-        processor(int videoWidth = 640, int videoHeight = 480, char* name = "Unnamed");
+        processor(int videoWidth = 640, int videoHeight = 480, char* name = "Unnamed Processor");
 
         void update();
         void draw();

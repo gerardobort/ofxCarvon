@@ -55,13 +55,6 @@ void viewHalfSphere::draw(){
         sCam.drawAxis();
         ofDisableDepthTest();
     sCam.end();
-
-    stringstream ss;
-    ss << "(s): Spherical rotate around static look vector"<<endl;
-    ss << "(m): Tween cam and look vector along straight line"<<endl;
-    ss << "(h): Handheld toggle"<<endl;
-    
-    ofDrawBitmapString(ss.str().c_str(), 20, 20);
 }
 
 //--------------------------------------------------------------

@@ -13,17 +13,21 @@ void ofApp::setup(){
     transformerSphereTexture1 = new transformerSphereTexture(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "sphere texture");
     viewHalfSphere1 = new viewHalfSphere(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "viewport", RECORD_VIDEO_HEIGHT);
     
-    gui.setup("settings", "settings.xml", 10, 10);
-    gui.add(calibrate.set("calibrate", false));
+    string settingsFile = "settings.xml";
+    gui.setup("settings", settingsFile);
+    gui.setDefaultBackgroundColor(ofColor(40, 100, 40));
+    gui.setDefaultFillColor(ofColor(0, 160, 0));
+    gui.setDefaultBorderColor(ofColor(0, 0, 0));
+    gui.add(calibrate.set("calibrate", true));
     gui.add(videoSource->getParameters());
     gui.add(transformerStandard1->getParameters());
     gui.add(debuggerFisheye1->getParameters());
     gui.add(transformerSphereTexture1->getParameters());
     gui.add(viewHalfSphere1->getParameters());
+    gui.minimizeAll();
 
-    gui.loadFromFile("settings.xml");
-    ofBackground(255, 255, 255);
-    ofClear(0);
+    gui.loadFromFile(settingsFile);
+    gui.setPosition(ofGetWindowWidth() - gui.getWidth() - 10, 10);
     shouldShowSettings = true;
 
     // sourceCanvas will contain the trimmed spherical video frames, so the image size should be squared.
@@ -37,14 +41,16 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     videoSource->update();
-    debuggerFisheye1->update();
+    if (calibrate) {
+        debuggerFisheye1->update();
+    }
     viewHalfSphere1->update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofClear(0);
-    ofBackground(0, 0, 0);
+    ofBackground(0);
     ofSetColor(255, 255, 255);
 
     // sourceCanvas purpose is to have the raw video input with some basic transformations applied on it
@@ -56,7 +62,9 @@ void ofApp::draw(){
         transformerStandard1->begin();
             videoSource->draw();
         transformerStandard1->end();
-        debuggerFisheye1->draw(); // just draws a ruler on top of the transformed input, this is helpful to calibrate the installation
+        if (calibrate) {
+            debuggerFisheye1->draw(); // just draws a ruler on top of the transformed input, this is helpful to calibrate the installation
+        }
     sourceCanvas.end();
 
     sphericalCanvas.begin();
@@ -74,7 +82,7 @@ void ofApp::draw(){
         videoSource->draw(0, 0, w, h);
         sourceCanvas.draw(0, h, w, h);
         sphericalCanvas.draw(0, 2*h, w, h);
-        viewportCanvas.draw(ofGetWindowWidth() - 0.5*VIEWPORT_WIDTH, 0, 0.5*VIEWPORT_WIDTH, 0.5*VIEWPORT_HEIGHT);
+        viewportCanvas.draw(w, 0, 0.5*VIEWPORT_WIDTH, 0.5*VIEWPORT_HEIGHT);
     } else {
         viewportCanvas.draw(0.5*(ofGetWindowWidth() - VIEWPORT_WIDTH), 0.5*(ofGetWindowHeight() - VIEWPORT_HEIGHT));
     }
