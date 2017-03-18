@@ -10,6 +10,10 @@ class processor {
         void draw();
 		bool isFrameNew();
 
+        ofParameterGroup* getParametersReference(void) {
+            return &parameters;
+        }
+
         ofParameterGroup getParameters(void) {
             return parameters;
         }
