@@ -19,6 +19,8 @@ void ofApp::setup(){
     _debuggerFisheye = new debuggerFisheye(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "debugger fisheye");
     _transformerSphereTexture = new transformerSphereTexture(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "sphere texture");
     _viewHalfSphere = new viewHalfSphere(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "viewport", RECORD_VIDEO_HEIGHT);
+
+    stereobm = new ofxCv::Stereo(16*10, 7);
     
     string settingsFile = "settings.xml";
     gui.setup("settings", settingsFile);
@@ -40,9 +42,16 @@ void ofApp::setup(){
     paramsView.add(*_transformerSphereTexture->getParametersReference());
     paramsView.add(*_viewHalfSphere->getParametersReference());
 
+    paramsStereo.setName("stereo");
+    paramsStereo.add(nDisparities.set("nDisparities", 16, 16, 256));
+    nDisparities.addListener(this, &ofApp::reloadStereoN);
+    paramsStereo.add(windowSize.set("windowSize", 5, 5, 91));
+    windowSize.addListener(this, &ofApp::reloadStereoS);
+
     gui.add(paramsLeft);
     gui.add(paramsRight);
     gui.add(paramsView);
+    gui.add(paramsStereo);
 
     gui.minimizeAll();
 
@@ -56,6 +65,12 @@ void ofApp::setup(){
     sphericalCanvas.allocate(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, GL_RGBA);
     // viewportCanvas helps to positionate the resulting output into the screen.
     viewportCanvas.allocate(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GL_RGBA);
+
+    leftImage.load("left.png");
+    //rightImage.load("right.png");
+    rightImage.load("chessboard-sample.jpg");
+    newRightImage.load("chessboard-sample.jpg");
+    
 }
 
 //--------------------------------------------------------------
@@ -100,13 +115,17 @@ void ofApp::draw(){
         _viewHalfSphere->draw(); // uses last binding
     viewportCanvas.end();
 
+    ofPixels pixels;
+    viewportCanvas.readToPixels(pixels);
+    leftImage.setFromPixels(pixels);
+
     if (calibrate) {
         videoSourceLeft->draw(0, 0, w, h);
         sourceCanvas.draw(0, h, w, w);
         sphericalCanvas.draw(0, h+w, w, w);
         viewportCanvas.draw(2*w, 0, 0.5*VIEWPORT_WIDTH, 0.5*VIEWPORT_HEIGHT);
     } else {
-        viewportCanvas.draw(0, 0.5*(ofGetWindowHeight() - VIEWPORT_HEIGHT), ofGetWindowWidth()/2, ofGetWindowHeight()/2);
+        viewportCanvas.draw(0, 0, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
     }
 
     // sourceCanvas purpose is to have the raw video input with some basic transformations applied on it
@@ -133,13 +152,63 @@ void ofApp::draw(){
         _viewHalfSphere->draw(); // uses last binding
     viewportCanvas.end();
 
+    viewportCanvas.readToPixels(pixels);
+    rightImage.setFromPixels(pixels);
+    //newRightImage.setFromPixels(pixels);
+
     if (calibrate) {
         videoSourceRight->draw(w, 0, w, h);
         sourceCanvas.draw(w, h, w, w);
         sphericalCanvas.draw(w, h+w, w, w);
         viewportCanvas.draw(2*w, 0.5*VIEWPORT_HEIGHT, 0.5*VIEWPORT_WIDTH, 0.5*VIEWPORT_HEIGHT);
     } else {
-        viewportCanvas.draw(ofGetWindowWidth()/2, 0.5*(ofGetWindowHeight() - VIEWPORT_HEIGHT), ofGetWindowWidth()/2, ofGetWindowHeight()/2);
+        viewportCanvas.draw(ofGetWindowWidth()/2, 0, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
+    }
+
+    if (!calibrate) {
+        /*
+        ofEnableAlphaBlending();
+        viewportCanvas.begin();
+            ofClear(0);
+            ofBackground(0);
+            ofSetColor(255, 0, 0, 200);
+            leftImage.draw(0, 0);
+            ofSetColor(0, 0, 255, 200);
+            rightImage.draw(20, 0);
+        viewportCanvas.end();
+        ofDisableAlphaBlending();
+        viewportCanvas.draw(0, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
+        */
+        //leftImage.setImageType(OF_IMAGE_GRAYSCALE);
+        rightImage.setImageType(OF_IMAGE_GRAYSCALE);
+        newRightImage.setImageType(OF_IMAGE_GRAYSCALE);
+
+        //stereobm->compute(rightImage, leftImage);
+        viewportCanvas.begin();
+            ofEnableAlphaBlending();
+            ofClear(0);
+            ofBackground(0);
+            //stereobm->draw();
+
+            ofSetColor(255, 0, 0, 200);
+            newRightImage.draw(0, 0);
+
+            bool success;
+            ofSetColor(0, 0, 255, 100);
+            rightImage.draw(0, 0);
+
+            ofPolyline points = stereobm->calibrate(rightImage, success);
+            stereobm->getDst(newRightImage);
+
+            ofSetColor(255, 255, 255, 255);
+            newRightImage.draw(0, 0);
+
+            ofSetColor(0, 255, 0, 255);
+            ofSetLineWidth(10);
+            points.draw();
+
+        viewportCanvas.end();
+        viewportCanvas.draw(ofGetWindowWidth()/2, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
     }
 
     if (shouldShowSettings) {

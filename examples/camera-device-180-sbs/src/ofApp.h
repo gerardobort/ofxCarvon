@@ -5,6 +5,7 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxCarvon.h"
+#include "ofxCv.h"
 
 #define RECORD_VIDEO_WIDTH 1280
 #define RECORD_VIDEO_HEIGHT 720
@@ -28,6 +29,16 @@ class ofApp : public ofBaseApp{
         void windowResized(int w, int h);
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
+
+        void reloadStereoN(int& _value) {
+            stereobm->setNDisparities(_value);
+            stereobm->reload();
+        }
+
+        void reloadStereoS(int& _value) {
+            stereobm->setSADWindowSize(_value);
+            stereobm->reload();
+        }
         
     private:
         ofParameterGroup paramsLeft;
@@ -43,9 +54,18 @@ class ofApp : public ofBaseApp{
         transformerSphereTexture* _transformerSphereTexture;
         viewHalfSphere* _viewHalfSphere;
 
+        ofParameterGroup paramsStereo;
+        ofParameter<int> nDisparities;
+        ofParameter<int> windowSize;
+
         ofFbo sourceCanvas;
         ofFbo sphericalCanvas;
         ofFbo viewportCanvas;
+
+        ofxCv::Stereo* stereobm;
+        ofImage leftImage;
+        ofImage rightImage;
+        ofImage newRightImage;
 
         bool shouldShowSettings;
 
