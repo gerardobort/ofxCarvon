@@ -55,6 +55,9 @@ class ofApp : public ofBaseApp{
         viewHalfSphere* _viewHalfSphere;
 
         ofParameterGroup paramsStereo;
+        ofParameter<bool> calibrateLeft;
+        ofParameter<bool> calibrateRight;
+        ofParameter<bool> viewStereo;
         ofParameter<int> nDisparities;
         ofParameter<int> windowSize;
 
@@ -63,9 +66,11 @@ class ofApp : public ofBaseApp{
         ofFbo viewportCanvas;
 
         ofxCv::Stereo* stereobm;
+        ofxCv::Camera* leftCamera;
         ofxCv::Camera* rightCamera;
         ofImage leftImage;
         ofImage rightImage;
+        ofImage leftImageRectified;
         ofImage rightImageRectified;
 
         bool shouldShowSettings;
