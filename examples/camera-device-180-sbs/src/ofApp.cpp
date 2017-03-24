@@ -215,7 +215,7 @@ void ofApp::draw(){
 
         if (viewStereo) {
             viewportCanvas.begin();
-            stereobm->compute(rightImageRectified, leftImageRectified);
+            stereobm->compute(leftImageRectified, rightImageRectified);
                 stereobm->draw();
             viewportCanvas.end();
             viewportCanvas.draw(ofGetWindowWidth()/4, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);

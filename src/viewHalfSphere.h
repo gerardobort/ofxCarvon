@@ -54,7 +54,7 @@ class viewHalfSphere: public view {
 
         Sphere sphereDome;
         ofBoxPrimitive box;
-        ofxSphereCam sCam;
+        ofEasyCam sCam;
         int textureSideSize;
 
         ofParameter<bool> calibrate;

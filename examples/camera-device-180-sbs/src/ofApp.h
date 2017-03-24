@@ -7,8 +7,8 @@
 #include "ofxCarvon.h"
 #include "ofxCv.h"
 
-#define RECORD_VIDEO_WIDTH 1280
-#define RECORD_VIDEO_HEIGHT 720
+#define RECORD_VIDEO_WIDTH 1920
+#define RECORD_VIDEO_HEIGHT 1080
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720

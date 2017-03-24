@@ -5,8 +5,6 @@ viewHalfSphere::viewHalfSphere(int videoWidth, int videoHeight, char* name, int 
     : view(videoWidth, videoHeight, name), textureSideSize(textureSideSize) {
     setupGui();
 
-    sCam.handheld = true;
-
     sphereDome.setup(0, M_PI, 0, M_PI, sphereStep, sphereStep);
     sphereDome.setTextureSize(ofPoint(textureSideSize));
 }
@@ -14,8 +12,6 @@ viewHalfSphere::viewHalfSphere(int videoWidth, int videoHeight, char* name, int 
 //--------------------------------------------------------------
 void viewHalfSphere::update(){
     view::update();
-
-    sCam.update();
 
     if (calibrate) {
         box.setResolution(1);
@@ -51,66 +47,12 @@ void viewHalfSphere::draw(){
             box.drawVertices();
             box.drawFaces();
         }
-        sCam.drawTarget();
-        sCam.drawAxis();
         ofDisableDepthTest();
     sCam.end();
 }
 
 //--------------------------------------------------------------
 void viewHalfSphere::keyPressed(int key){
-    ofVec3f v;
-    switch (key) {
-        case 's':
-            sCam.randomPosS();
-            break;
-        case 'm':
-            sCam.randomPosM();
-            break;
-        case 'h':
-            sCam.handheld = !sCam.handheld;
-            break;
-        case 'f':
-            ofToggleFullscreen();
-            break;
-        case '0':
-            v = ofVec3f(0, 0, sphereRadius*0.2);
-            sCam.moveTo(v, 2000);
-            v = ofVec3f(0, 0, -sphereRadius*0.5);
-            sCam.lookAtTo(v, 2000);
-            break;
-        case '1':
-            v = ofVec3f(-sphereRadius*0.2, 0, sphereRadius*0.2);
-            sCam.moveTo(v, 2000);
-            v = ofVec3f(-sphereRadius*0.5, 0, -sphereRadius*0.5);
-            sCam.lookAtTo(v, 2000);
-            break;
-        case '2':
-            v = ofVec3f(sphereRadius*0.2, 0, sphereRadius*0.2);
-            sCam.moveTo(v, 2000);
-            v = ofVec3f(sphereRadius*0.5, 0, -sphereRadius*0.5);
-            sCam.lookAtTo(v, 2000);
-            break;
-        case '3':
-            v = ofVec3f(0, 0, 0);
-            sCam.moveTo(v, 2000);
-            v = ofVec3f(0, 0, -sphereRadius);
-            sCam.lookAtTo(v, 2000);
-            break;
-        case '4':
-            v = ofVec3f(0, sphereRadius*0.2, sphereRadius*0.5);
-            sCam.moveTo(v, 2000);
-            v = ofVec3f(0, -sphereRadius*0.2, -sphereRadius*0.5);
-            sCam.lookAtTo(v, 2000);
-            break;
-        case '5':
-            v = ofVec3f(0, -sphereRadius*0.2, sphereRadius*0.5);
-            sCam.moveTo(v, 2000);
-            v = ofVec3f(0, sphereRadius*0.2, -sphereRadius*0.5);
-            sCam.lookAtTo(v, 2000);
-            break;
-    }
-
 }
 
 //--------------------------------------------------------------
