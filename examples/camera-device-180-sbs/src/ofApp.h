@@ -63,9 +63,10 @@ class ofApp : public ofBaseApp{
         ofFbo viewportCanvas;
 
         ofxCv::Stereo* stereobm;
+        ofxCv::Camera* rightCamera;
         ofImage leftImage;
         ofImage rightImage;
-        ofImage dst;
+        ofImage rightImageRectified;
 
         bool shouldShowSettings;
 

@@ -21,6 +21,7 @@ void ofApp::setup(){
     _viewHalfSphere = new viewHalfSphere(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "viewport", RECORD_VIDEO_HEIGHT);
 
     stereobm = new ofxCv::Stereo(16*10, 7);
+    rightCamera = new ofxCv::Camera();
     
     string settingsFile = "settings.xml";
     gui.setup("settings", settingsFile);
@@ -67,8 +68,9 @@ void ofApp::setup(){
     viewportCanvas.allocate(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GL_RGBA);
 
     leftImage.load("left.png");
-    //rightImage.load("right.png");
-    rightImage.load("chessboard-sample.jpg");
+    rightImage.load("right.png");
+    rightImageRectified.allocate(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, OF_IMAGE_GRAYSCALE); // TODO remove?
+    //rightImageRectified.load("right.png");
     
 }
 
@@ -179,28 +181,30 @@ void ofApp::draw(){
         */
         //leftImage.setImageType(OF_IMAGE_GRAYSCALE);
         rightImage.setImageType(OF_IMAGE_GRAYSCALE);
+        rightImageRectified.setImageType(OF_IMAGE_GRAYSCALE);
 
         //stereobm->compute(rightImage, leftImage);
         viewportCanvas.begin();
             ofEnableAlphaBlending();
             ofClear(0);
-            ofBackground(0);
+            ofBackground(255);
             //stereobm->draw();
 
             bool success;
-            ofSetColor(0, 0, 255, 100);
+            ofSetColor(255, 255, 255, 255);
             rightImage.draw(0, 0);
 
-            ofPolyline points = stereobm->calibrate(rightImage, success);
-            dst.setImageType(OF_IMAGE_GRAYSCALE);
-            stereobm->getDst(dst);
-
-            ofSetColor(255, 255, 255, 255);
-            dst.draw(0, 0);
-
+            ofPolyline points = rightCamera->calibrate(rightImage, success);
             ofSetColor(0, 255, 0, 255);
             ofSetLineWidth(10);
             points.draw();
+
+            if (rightCamera->isReady) {
+                rightCamera->rectify(rightImage, rightImageRectified);
+                rightImageRectified.setImageType(OF_IMAGE_GRAYSCALE);
+                ofSetColor(255, 255, 255, 255);
+                rightImageRectified.draw(0, 0);
+            }
 
         viewportCanvas.end();
         viewportCanvas.draw(ofGetWindowWidth()/2, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
