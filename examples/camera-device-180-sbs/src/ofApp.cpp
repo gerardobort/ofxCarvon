@@ -69,7 +69,6 @@ void ofApp::setup(){
     leftImage.load("left.png");
     //rightImage.load("right.png");
     rightImage.load("chessboard-sample.jpg");
-    newRightImage.load("chessboard-sample.jpg");
     
 }
 
@@ -154,7 +153,6 @@ void ofApp::draw(){
 
     viewportCanvas.readToPixels(pixels);
     rightImage.setFromPixels(pixels);
-    //newRightImage.setFromPixels(pixels);
 
     if (calibrate) {
         videoSourceRight->draw(w, 0, w, h);
@@ -181,7 +179,6 @@ void ofApp::draw(){
         */
         //leftImage.setImageType(OF_IMAGE_GRAYSCALE);
         rightImage.setImageType(OF_IMAGE_GRAYSCALE);
-        newRightImage.setImageType(OF_IMAGE_GRAYSCALE);
 
         //stereobm->compute(rightImage, leftImage);
         viewportCanvas.begin();
@@ -190,18 +187,16 @@ void ofApp::draw(){
             ofBackground(0);
             //stereobm->draw();
 
-            ofSetColor(255, 0, 0, 200);
-            newRightImage.draw(0, 0);
-
             bool success;
             ofSetColor(0, 0, 255, 100);
             rightImage.draw(0, 0);
 
             ofPolyline points = stereobm->calibrate(rightImage, success);
-            stereobm->getDst(newRightImage);
+            dst.setImageType(OF_IMAGE_GRAYSCALE);
+            stereobm->getDst(dst);
 
             ofSetColor(255, 255, 255, 255);
-            newRightImage.draw(0, 0);
+            dst.draw(0, 0);
 
             ofSetColor(0, 255, 0, 255);
             ofSetLineWidth(10);

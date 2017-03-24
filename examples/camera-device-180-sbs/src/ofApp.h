@@ -65,7 +65,7 @@ class ofApp : public ofBaseApp{
         ofxCv::Stereo* stereobm;
         ofImage leftImage;
         ofImage rightImage;
-        ofImage newRightImage;
+        ofImage dst;
 
         bool shouldShowSettings;
 
