@@ -60,6 +60,6 @@ void viewHalfSphere::setupGui() {
     parameters.add(calibrate.set("calibrate", true));
     parameters.add(sphereStep.set("sphere step", 0.1, 0, 1));
     sphereStep.addListener(this, &viewHalfSphere::reload);
-    parameters.add(sphereRadius.set("sphere Radius", 1.0*videoWidth, 0, 2.0*videoHeight));
+    parameters.add(sphereRadius.set("sphere Radius", 1.0*videoWidth, 0, 3.0*videoHeight));
     parameters.add(sphereDistance.set("sphere distance", 1.0*videoWidth, 0, 2.0*6.0*videoHeight));
 }

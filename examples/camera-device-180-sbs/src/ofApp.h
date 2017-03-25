@@ -31,12 +31,12 @@ class ofApp : public ofBaseApp{
         void gotMessage(ofMessage msg);
 
         void reloadStereoN(int& _value) {
-            stereobm->setNDisparities(_value);
+            stereobm->setNDisparities(16*_value);
             stereobm->reload();
         }
 
         void reloadStereoS(int& _value) {
-            stereobm->setSADWindowSize(_value);
+            stereobm->setSADWindowSize(4 + 2*(_value - 1) + 1);
             stereobm->reload();
         }
         
@@ -57,6 +57,7 @@ class ofApp : public ofBaseApp{
         ofParameterGroup paramsStereo;
         ofParameter<bool> calibrateLeft;
         ofParameter<bool> calibrateRight;
+        ofParameter<bool> swapCameras;
         ofParameter<bool> viewStereo;
         ofParameter<int> nDisparities;
         ofParameter<int> windowSize;
