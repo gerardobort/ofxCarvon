@@ -225,6 +225,9 @@ void ofApp::draw(){
         viewportCanvas.draw(ofGetWindowWidth()/2, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
 
         if (viewStereo) {
+            // TODO research this way...
+            // http://docs.opencv.org/2.4.1/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#stereocalibrate
+            // http://docs.opencv.org/2.4.1/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#stereorectify
             if (swapCameras) {
                 stereobm->compute(rightImageRectified, leftImageRectified);
             } else {
