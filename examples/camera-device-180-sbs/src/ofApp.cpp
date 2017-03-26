@@ -47,6 +47,7 @@ void ofApp::setup(){
     paramsStereo.setName("stereo");
     paramsStereo.add(calibrateLeft.set("calibrateLeft", true));
     paramsStereo.add(calibrateRight.set("calibrateRight", true));
+    paramsStereo.add(calibrateStereo.set("calibrateStereo", true));
     paramsStereo.add(viewStereo.set("viewStereo", false));
     paramsStereo.add(swapCameras.set("swapCameras", false));
     paramsStereo.add(nDisparities.set("nDisparities", 1, 1, 20));
@@ -190,6 +191,10 @@ void ofApp::draw(){
             if (leftCamera->isReady) {
                 leftCamera->rectify(leftImage, leftImageRectified);
                 ofSetColor(255, 255, 255, 255);
+                if (stereobm->isReady) {
+                    // updates left image based on fundamental matrix
+                    stereobm->rectifyLeft(leftImageRectified);
+                }
                 leftImageRectified.draw(0, 0);
             }
 
@@ -224,10 +229,12 @@ void ofApp::draw(){
         viewportCanvas.end();
         viewportCanvas.draw(ofGetWindowWidth()/2, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
 
-        if (viewStereo) {
+        if (leftCamera->isReady && rightCamera->isReady && !stereobm->isReady && calibrateStereo) {
             // TODO research this way...
             // http://docs.opencv.org/2.4.1/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#stereocalibrate
             // http://docs.opencv.org/2.4.1/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#stereorectify
+            stereobm->calibrate(*leftCamera, *rightCamera);
+        } else if (viewStereo) {
             if (swapCameras) {
                 stereobm->compute(rightImageRectified, leftImageRectified);
             } else {

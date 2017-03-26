@@ -57,6 +57,7 @@ class ofApp : public ofBaseApp{
         ofParameterGroup paramsStereo;
         ofParameter<bool> calibrateLeft;
         ofParameter<bool> calibrateRight;
+        ofParameter<bool> calibrateStereo;
         ofParameter<bool> swapCameras;
         ofParameter<bool> viewStereo;
         ofParameter<int> nDisparities;
