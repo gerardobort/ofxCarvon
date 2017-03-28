@@ -10,3 +10,4 @@
 #include "transformerSphereTexture.h"
 #include "viewHalfSphere.h"
 #include "ofxVideoRecorder.h"
+#include "Stereo.h"
