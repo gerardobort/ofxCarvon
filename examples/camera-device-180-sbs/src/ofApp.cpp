@@ -85,30 +85,6 @@ void ofApp::update(){
         _debuggerFisheye->update();
     }
     _viewHalfSphere->update();
-
-    if (!calibrate) {
-        if (calibrateLeft) {
-            leftPoints = leftCamera->calibrate(leftImage);
-        }
-        if (calibrateRight) {
-            rightPoints = rightCamera->calibrate(rightImage);
-        }
-
-        if (leftCamera->isReady) {
-            leftCamera->rectify(leftImage, leftImageRectified);
-        }
-        if (rightCamera->isReady) {
-            rightCamera->rectify(rightImage, rightImageRectified);
-        }
-
-        if (leftCamera->isReady && rightCamera->isReady && calibrateStereo) {
-            stereobm->calibrate(*leftCamera, *rightCamera);
-        }
-
-        if (leftCamera->isReady && rightCamera->isReady && stereobm->isReady) {
-            stereobm->rectify(leftImageRectified, rightImageRectified);
-        }
-    }
 }
 
 //--------------------------------------------------------------
@@ -192,6 +168,31 @@ void ofApp::draw(){
         viewportCanvas.draw(ofGetWindowWidth()/2, 0, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
     }
 
+
+    if (!calibrate) {
+        if (calibrateLeft) {
+            leftPoints = leftCamera->calibrate(leftImage);
+        }
+        if (calibrateRight) {
+            rightPoints = rightCamera->calibrate(rightImage);
+        }
+
+        if (leftCamera->isReady) {
+            leftCamera->rectify(leftImage, leftImageRectified);
+        }
+        if (rightCamera->isReady) {
+            rightCamera->rectify(rightImage, rightImageRectified);
+        }
+
+        if (leftCamera->isReady && rightCamera->isReady && calibrateStereo) {
+            stereobm->calibrate(*leftCamera, *rightCamera);
+        }
+
+        if (leftCamera->isReady && rightCamera->isReady && stereobm->isReady) {
+            stereobm->rectify(leftImage, rightImage);
+        }
+    }
+
     if (!calibrate) {
         ofEnableAlphaBlending();
         if (viewStereo) {
@@ -216,8 +217,9 @@ void ofApp::draw(){
                     ofSetColor(255, 0, 0, 255);
                     if (stereobm->isReady) {
                         ofSetColor(255, 255, 255, 255);
-                    }
-                    leftImageRectified.draw(0, 0);
+                        leftImage.draw(0, 0);
+                    } else
+                        leftImageRectified.draw(0, 0);
                 }
 
                 ofSetColor(0, 255, 0, 255);
@@ -238,8 +240,9 @@ void ofApp::draw(){
                     ofSetColor(255, 0, 0, 255);
                     if (stereobm->isReady) {
                         ofSetColor(255, 255, 255, 255);
-                    }
-                    rightImageRectified.draw(0, 0);
+                        rightImage.draw(0, 0);
+                    } else
+                        rightImageRectified.draw(0, 0);
                 }
 
                 ofSetColor(0, 255, 0, 255);
