@@ -74,6 +74,8 @@ class ofApp : public ofBaseApp{
         ofImage rightImage;
         ofImage leftImageRectified;
         ofImage rightImageRectified;
+        ofPolyline leftPoints;
+        ofPolyline rightPoints;
 
         bool shouldShowSettings;
 

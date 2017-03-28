@@ -85,6 +85,30 @@ void ofApp::update(){
         _debuggerFisheye->update();
     }
     _viewHalfSphere->update();
+
+    if (!calibrate) {
+        if (calibrateLeft) {
+            leftPoints = leftCamera->calibrate(leftImage);
+        }
+        if (calibrateRight) {
+            rightPoints = rightCamera->calibrate(rightImage);
+        }
+
+        if (leftCamera->isReady) {
+            leftCamera->rectify(leftImage, leftImageRectified);
+        }
+        if (rightCamera->isReady) {
+            rightCamera->rectify(rightImage, rightImageRectified);
+        }
+
+        if (leftCamera->isReady && rightCamera->isReady && calibrateStereo) {
+            stereobm->calibrate(*leftCamera, *rightCamera);
+        }
+
+        if (leftCamera->isReady && rightCamera->isReady && stereobm->isReady) {
+            stereobm->rectify(leftImageRectified, rightImageRectified);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -170,71 +194,7 @@ void ofApp::draw(){
 
     if (!calibrate) {
         ofEnableAlphaBlending();
-
-        //leftImage.resize(640, 480);
-        //rightImage.resize(640, 480);
-
-        ofPolyline leftPoints;
-        ofPolyline rightPoints;
-
-        viewportCanvas.begin();
-            ofClear(0);
-            ofBackground(255);
-
-            ofSetColor(0, 255, 0, 255);
-            leftImage.draw(0, 0);
-
-            if (calibrateLeft) {
-                leftPoints = leftCamera->calibrate(leftImage);
-            }
-
-            if (leftCamera->isReady) {
-                leftCamera->rectify(leftImage, leftImageRectified);
-                ofSetColor(255, 255, 255, 255);
-                if (stereobm->isReady) {
-                    // updates left image based on fundamental matrix
-                    stereobm->rectifyLeft(leftImageRectified);
-                }
-                leftImageRectified.draw(0, 0);
-            }
-
-            ofSetColor(0, 255, 0, 255);
-            ofSetLineWidth(10);
-            leftPoints.draw();
-        viewportCanvas.end();
-        viewportCanvas.draw(0, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
-
-        viewportCanvas.begin();
-            ofEnableAlphaBlending();
-            ofClear(0);
-            ofBackground(255);
-
-            ofSetColor(0, 255, 0, 255);
-            rightImage.draw(0, 0);
-
-            if (calibrateRight) {
-                rightPoints = rightCamera->calibrate(rightImage);
-            }
-
-            if (rightCamera->isReady) {
-                rightCamera->rectify(rightImage, rightImageRectified);
-                ofSetColor(255, 255, 255, 255);
-                rightImageRectified.draw(0, 0);
-            }
-
-            ofSetColor(0, 255, 0, 255);
-            ofSetLineWidth(10);
-            rightPoints.draw();
-
-        viewportCanvas.end();
-        viewportCanvas.draw(ofGetWindowWidth()/2, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
-
-        if (leftCamera->isReady && rightCamera->isReady && !stereobm->isReady && calibrateStereo) {
-            // TODO research this way...
-            // http://docs.opencv.org/2.4.1/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#stereocalibrate
-            // http://docs.opencv.org/2.4.1/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html#stereorectify
-            stereobm->calibrate(*leftCamera, *rightCamera);
-        } else if (viewStereo) {
+        if (viewStereo) {
             if (swapCameras) {
                 stereobm->compute(rightImageRectified, leftImageRectified);
             } else {
@@ -244,6 +204,50 @@ void ofApp::draw(){
                 stereobm->draw();
             viewportCanvas.end();
             viewportCanvas.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+        } else {
+            viewportCanvas.begin();
+                ofClear(0);
+                ofBackground(255);
+
+                ofSetColor(0, 255, 0, 255);
+                leftImage.draw(0, 0);
+
+                if (leftCamera->isReady) {
+                    ofSetColor(255, 0, 0, 255);
+                    if (stereobm->isReady) {
+                        ofSetColor(255, 255, 255, 255);
+                    }
+                    leftImageRectified.draw(0, 0);
+                }
+
+                ofSetColor(0, 255, 0, 255);
+                ofSetLineWidth(10);
+                leftPoints.draw();
+            viewportCanvas.end();
+            viewportCanvas.draw(0, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
+
+            viewportCanvas.begin();
+                ofEnableAlphaBlending();
+                ofClear(0);
+                ofBackground(255);
+
+                ofSetColor(0, 255, 0, 255);
+                rightImage.draw(0, 0);
+
+                if (rightCamera->isReady) {
+                    ofSetColor(255, 0, 0, 255);
+                    if (stereobm->isReady) {
+                        ofSetColor(255, 255, 255, 255);
+                    }
+                    rightImageRectified.draw(0, 0);
+                }
+
+                ofSetColor(0, 255, 0, 255);
+                ofSetLineWidth(10);
+                rightPoints.draw();
+
+            viewportCanvas.end();
+            viewportCanvas.draw(ofGetWindowWidth()/2, ofGetWindowHeight()/2, ofGetWindowWidth()/2, ofGetWindowHeight()/2);
         }
         ofDisableAlphaBlending();
     }
