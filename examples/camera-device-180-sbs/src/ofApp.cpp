@@ -190,7 +190,7 @@ void ofApp::draw(){
             }
         }
 
-        if (leftCamera->isReady && rightCamera->isReady && calibrateStereo) {
+        if (indexSample == NUM_CALIBRATION_SAMPLES && calibrateStereo) {
             leftCamera->calibrate();
             rightCamera->calibrate();
             stereobm->calibrate(*leftCamera, *rightCamera);
@@ -201,7 +201,7 @@ void ofApp::draw(){
             // two alternatives, both doesn't work as expected
             stereobm->rectify(leftImage, rightImage);
             //stereobm->rectifyLeft(leftImage);
-        } else if (leftCamera->isReady && rightCamera->isReady) {
+        } else if (indexSample == NUM_CALIBRATION_SAMPLES) {
             leftCamera->rectify(leftImage, leftImage);
             rightCamera->rectify(rightImage, rightImage);
         }

@@ -53,9 +53,9 @@ namespace ofxCv {
     }
 
 	void Camera::calibrate(){
-        int flags = CV_CALIB_FIX_K4|CV_CALIB_FIX_K5;
+        int flags = CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
         double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
-        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, true);
+        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, false);
 
         std::cout << "RMS: " << rms << std::endl;
         std::cout << "Distortion coefficients: " << distortionCoefficients << std::endl;
@@ -196,9 +196,10 @@ namespace ofxCv {
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize,
             // output matrices
-            R, T, E, F);//,
-            //TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5),
-            //CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+            R, T, E, F,
+            TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5),
+            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+            // CV_CALIB_FIX_PRINCIPAL_POINT is key for good results in both stereo or individual calibration
 
         std::cout << "R: " << R << std::endl;
         std::cout << "T: " << T << std::endl;

@@ -13,7 +13,7 @@
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
 
-#define NUM_CALIBRATION_SAMPLES 15
+#define NUM_CALIBRATION_SAMPLES 30
 
 class ofApp : public ofBaseApp{
     public:
