@@ -20,9 +20,10 @@ void ofApp::setup(){
     _transformerSphereTexture = new transformerSphereTexture(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "sphere texture");
     _viewHalfSphere = new viewHalfSphere(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "viewport", RECORD_VIDEO_HEIGHT);
 
+    indexSample = 0;
     stereobm = new ofxCv::Stereo(16*10, 7);
-    leftCamera = new ofxCv::Camera();
-    rightCamera = new ofxCv::Camera();
+    leftCamera = new ofxCv::Camera(NUM_CALIBRATION_SAMPLES);
+    rightCamera = new ofxCv::Camera(NUM_CALIBRATION_SAMPLES);
     
     string settingsFile = "settings.xml";
     gui.setup("settings", settingsFile);
@@ -45,12 +46,12 @@ void ofApp::setup(){
     paramsView.add(*_viewHalfSphere->getParametersReference());
 
     paramsStereo.setName("stereo");
-    paramsStereo.add(calibrateLeft.set("calibrateLeft", true));
-    paramsStereo.add(calibrateRight.set("calibrateRight", true));
+    paramsStereo.add(indexSample.set("indexSample", 0, 0, NUM_CALIBRATION_SAMPLES -1));
     paramsStereo.add(calibrateStereo.set("calibrateStereo", true));
+    paramsStereo.add(showStereoRectification.set("showStereoRectification", true));
     paramsStereo.add(viewStereo.set("viewStereo", false));
     paramsStereo.add(swapCameras.set("swapCameras", false));
-    paramsStereo.add(nDisparities.set("nDisparities", 1, 1, 20));
+    paramsStereo.add(nDisparities.set("nDisparities", 1, 1, 40));
     nDisparities.addListener(this, &ofApp::reloadStereoN);
     paramsStereo.add(windowSize.set("windowSize", 1, 1, 100));
     windowSize.addListener(this, &ofApp::reloadStereoS);
@@ -65,6 +66,7 @@ void ofApp::setup(){
     gui.loadFromFile(settingsFile);
     gui.setPosition(ofGetWindowWidth() - gui.getWidth() - 10, 10);
     shouldShowSettings = true;
+    indexSample = 0;
 
     // sourceCanvas will contain the trimmed spherical video frames, so the image size should be squared.
     sourceCanvas.allocate(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, GL_RGBA);
@@ -121,7 +123,11 @@ void ofApp::draw(){
 
     ofPixels pixels;
     viewportCanvas.readToPixels(pixels);
-    leftImage.setFromPixels(pixels);
+    if (swapCameras) {
+        rightImage.setFromPixels(pixels);
+    } else {
+        leftImage.setFromPixels(pixels);
+    }
 
     if (calibrate) {
         videoSourceLeft->draw(0, 0, w, h);
@@ -157,7 +163,11 @@ void ofApp::draw(){
     viewportCanvas.end();
 
     viewportCanvas.readToPixels(pixels);
-    rightImage.setFromPixels(pixels);
+    if (swapCameras) {
+        leftImage.setFromPixels(pixels);
+    } else {
+        rightImage.setFromPixels(pixels);
+    }
 
     if (calibrate) {
         videoSourceRight->draw(w, 0, w, h);
@@ -170,37 +180,37 @@ void ofApp::draw(){
 
 
     if (!calibrate) {
-        if (calibrateLeft) {
-            leftPoints = leftCamera->calibrate(leftImage);
-        }
-        if (calibrateRight) {
-            rightPoints = rightCamera->calibrate(rightImage);
-        }
-
-        if (leftCamera->isReady) {
-            leftCamera->rectify(leftImage, leftImageRectified);
-        }
-        if (rightCamera->isReady) {
-            rightCamera->rectify(rightImage, rightImageRectified);
+        if (calibrateStereo && ofGetElapsedTimeMillis() > 1000) {
+            if (
+                leftCamera->findChessboardCorners(leftImage, indexSample, leftPoints)
+                && rightCamera->findChessboardCorners(rightImage, indexSample, rightPoints)
+            ) {
+                indexSample++;
+                ofResetElapsedTimeCounter();
+            }
         }
 
         if (leftCamera->isReady && rightCamera->isReady && calibrateStereo) {
+            leftCamera->calibrate();
+            rightCamera->calibrate();
             stereobm->calibrate(*leftCamera, *rightCamera);
+            calibrateStereo = false;
         }
 
-        if (leftCamera->isReady && rightCamera->isReady && stereobm->isReady) {
+        if (stereobm->isReady && showStereoRectification) {
+            // two alternatives, both doesn't work as expected
             stereobm->rectify(leftImage, rightImage);
+            //stereobm->rectifyLeft(leftImage);
+        } else if (leftCamera->isReady && rightCamera->isReady) {
+            leftCamera->rectify(leftImage, leftImage);
+            rightCamera->rectify(rightImage, rightImage);
         }
     }
 
     if (!calibrate) {
         ofEnableAlphaBlending();
         if (viewStereo) {
-            if (swapCameras) {
-                stereobm->compute(rightImageRectified, leftImageRectified);
-            } else {
-                stereobm->compute(leftImageRectified, rightImageRectified);
-            }
+            stereobm->compute(leftImage, rightImage);
             viewportCanvas.begin();
                 stereobm->draw();
             viewportCanvas.end();
@@ -219,7 +229,7 @@ void ofApp::draw(){
                         ofSetColor(255, 255, 255, 255);
                         leftImage.draw(0, 0);
                     } else
-                        leftImageRectified.draw(0, 0);
+                        leftImage.draw(0, 0);
                 }
 
                 ofSetColor(0, 255, 0, 255);
@@ -242,7 +252,7 @@ void ofApp::draw(){
                         ofSetColor(255, 255, 255, 255);
                         rightImage.draw(0, 0);
                     } else
-                        rightImageRectified.draw(0, 0);
+                        rightImage.draw(0, 0);
                 }
 
                 ofSetColor(0, 255, 0, 255);

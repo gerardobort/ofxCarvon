@@ -16,17 +16,13 @@ namespace ofxCv {
     // --------------
 	class Camera {
 	public:
-		Camera();
+		Camera(int numSamples);
 		virtual ~Camera();
 
         // chessboard calibration
-        template <class T>
-		ofPolyline calibrate(T& image) {
-            image.setImageType(OF_IMAGE_GRAYSCALE);
-            return toOf(calibrate(toCv(image)));
-        }
-	    vector<cv::Point2f> calibrate(cv::Mat image);
+	    bool findChessboardCorners(ofImage& srcImage, int indexSample, ofPolyline& corners);
         vector<cv::Point3f> Create3DChessboardCorners(cv::Size boardSize, float squareSize);
+	    void calibrate();
 
         void rectify(ofImage srcImage, ofImage& dstImage);
         
@@ -41,6 +37,9 @@ namespace ofxCv {
         cv::Mat cameraMatrix;
         cv::Mat cameraMatrixRefined;
 
+        cv::Mat map1, map2;
+
+        int numSamples;
         bool isReady;
         
     private:

@@ -13,6 +13,8 @@
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
 
+#define NUM_CALIBRATION_SAMPLES 15
+
 class ofApp : public ofBaseApp{
     public:
         void setup();
@@ -55,9 +57,9 @@ class ofApp : public ofBaseApp{
         viewHalfSphere* _viewHalfSphere;
 
         ofParameterGroup paramsStereo;
-        ofParameter<bool> calibrateLeft;
-        ofParameter<bool> calibrateRight;
+        ofParameter<int> indexSample;
         ofParameter<bool> calibrateStereo;
+        ofParameter<bool> showStereoRectification;
         ofParameter<bool> swapCameras;
         ofParameter<bool> viewStereo;
         ofParameter<int> nDisparities;
@@ -72,8 +74,6 @@ class ofApp : public ofBaseApp{
         ofxCv::Camera* rightCamera;
         ofImage leftImage;
         ofImage rightImage;
-        ofImage leftImageRectified;
-        ofImage rightImageRectified;
         ofPolyline leftPoints;
         ofPolyline rightPoints;
 

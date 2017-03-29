@@ -7,69 +7,79 @@ namespace ofxCv {
 
 
     // --------------
-	Camera::Camera(){
+	Camera::Camera(int numSamples): numSamples(numSamples){
         isReady = false;
         distortionCoefficients = cv::Mat::zeros(8, 1, CV_64F); // There are 8 distortion coefficients
         cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
         cameraMatrixRefined = cv::Mat::eye(3, 3, CV_64F);
 
-        objectPoints = std::vector<std::vector<cv::Point3f> >(1);
-        imagePoints = std::vector<std::vector<cv::Point2f> >(1);
+        objectPoints = std::vector<std::vector<cv::Point3f> >(numSamples);
+        imagePoints = std::vector<std::vector<cv::Point2f> >(numSamples);
 	}
 	
 	Camera::~Camera(){
 	}
 
-	vector<Point2f> Camera::calibrate(Mat image){
+	bool Camera::findChessboardCorners(ofImage& srcImage, int indexSample, ofPolyline& corners){
+        ofImage tmpImage;
+        tmpImage.clone(srcImage);
+        tmpImage.setImageType(OF_IMAGE_GRAYSCALE);
+        cv::Mat grayscaleImage = toCv(tmpImage);
+
         boardSize = cv::Size(9,7);
-        imageSize = image.size();
+        imageSize = grayscaleImage.size();
 
         // CALIB_CB_FAST_CHECK saves a lot of time on images
         // that do not contain any chessboard corners
-        bool success = findChessboardCorners(image, boardSize, imagePoints[0], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS | CALIB_CB_FAST_CHECK);
+        bool success = cv::findChessboardCorners(grayscaleImage, boardSize, imagePoints[indexSample], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS | CALIB_CB_FAST_CHECK);
 
         if (success) {
-            isReady = true;
             // call-again for better corner detection
-            cornerSubPix(image, imagePoints[0], cv::Size(11, 11), cv::Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 100, 0.1));
+            cv::cornerSubPix(grayscaleImage, imagePoints[indexSample], cv::Size(11, 11), cv::Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 100, 0.1));
+
+            float squareSize = 1.f; // This is "1 arbitrary unit"
+            objectPoints[indexSample] = Create3DChessboardCorners(boardSize, squareSize);
 
             // drawChessboardCorners(image, boardSize, Mat(imagePoints[0]), success);
             // http://programmingexamples.net/wiki/OpenCV/CheckerboardCalibration
 
-            float squareSize = 1.f; // This is "1 arbitrary unit"
-
-            // Find the chessboard corners
-            objectPoints[0] = Create3DChessboardCorners(boardSize, squareSize);
-            
-            int flags = CV_CALIB_FIX_K4|CV_CALIB_FIX_K5;
-            double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
-            cameraMatrixRefined = getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 0, imageSize, 0, true);
-
-            std::cout << "RMS: " << rms << std::endl;
-            std::cout << "Distortion coefficients: " << distortionCoefficients << std::endl;
-            std::cout << "Camera matrix: " << cameraMatrix << std::endl;
-            std::cout << "Camera matrix refined: " << cameraMatrixRefined << std::endl;
+            corners = toOf(imagePoints[indexSample]);
+            if (indexSample == numSamples -1) {
+                isReady = true;
+            }
         }
 
-        return imagePoints[0];
+        return success;
+    }
+
+	void Camera::calibrate(){
+        int flags = CV_CALIB_FIX_K4|CV_CALIB_FIX_K5;
+        double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
+        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 0.5, imageSize, 0, true);
+
+        std::cout << "RMS: " << rms << std::endl;
+        std::cout << "Distortion coefficients: " << distortionCoefficients << std::endl;
+        std::cout << "Camera matrix: " << cameraMatrix << std::endl;
+        std::cout << "Camera matrix refined: " << cameraMatrixRefined << std::endl;
+
+        // helps rectifying faster (expanded method)
+        initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat(), cameraMatrixRefined, imageSize, CV_16SC2, map1, map2);
     }
 
     void Camera::rectify(ofImage srcImage, ofImage& dstImage) {
-        // method 1
         cv::Mat srcMat = toCv(srcImage);
         cv::Mat dstMat;
-        cv::undistort(srcMat, dstMat, cameraMatrixRefined, distortionCoefficients);
 
-        // this conversion method doesn't work very well when applying later StereoSGBM
-        //ofPixels pixels;
-        //toOf(dstMat, pixels);
-        //dstImage.setFromPixels(pixels);
+        // method 1
+        // unexpanded method (less efficient)
+        // cv::undistort(srcMat, dstMat, cameraMatrixRefined, distortionCoefficients);
+
+        // method 2
+        // expanded method (more efficient, requires map1, map2)
+        remap(srcMat, dstMat, map1, map2, INTER_LINEAR);
 
         // copy resultant matrix into dstImage
         toOf(dstMat, dstImage);
-
-        // for some reason this seems to be necessary, need to research if there's performance to improve here, apparently yes.
-        // setting CV_*** Mat types, or pre-allocating the dstImage is not enough.
         dstImage.setImageType(OF_IMAGE_COLOR);
     }
 
@@ -174,16 +184,21 @@ namespace ofxCv {
 
 
     void Stereo::calibrate(Camera& leftCamera, Camera& rightCamera) {
-        double res = stereoCalibrate(
+        if (!leftCamera.isReady || !rightCamera.isReady) {
+            std::cout << "Error: Cameras not ready yet for setero calibration: missing camera calibration" << std::endl;
+            return;
+        }
+
+        double res = cv::stereoCalibrate(
             leftCamera.objectPoints,
             leftCamera.imagePoints, rightCamera.imagePoints,
             leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients,
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize,
             // output matrices
-            R, T, E, F,
-            TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5),
-            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+            R, T, E, F);//,
+            //TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5),
+            //CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
 
         std::cout << "R: " << R << std::endl;
         std::cout << "T: " << T << std::endl;
@@ -195,7 +210,7 @@ namespace ofxCv {
             leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients,
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize, R, T,
-            R1, R2, P1, P2, Q, 1); // see alpha param
+            R1, R2, P1, P2, Q, 0); // see alpha param
 
         std::cout << "R1" << R1 << std::endl;
         std::cout << "R2" << R2 << std::endl;
@@ -204,8 +219,8 @@ namespace ofxCv {
         std::cout << "Q" << Q << std::endl;
 
         // Applying Undistort
-        initUndistortRectifyMap(leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients, R1, P1, leftCamera.imageSize, CV_32F, map1x, map1y);
-        initUndistortRectifyMap(rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients, R2, P2, rightCamera.imageSize, CV_32F, map2x, map2y);
+        cv::initUndistortRectifyMap(leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients, R1, P1, leftCamera.imageSize, CV_32F, map1x, map1y);
+        cv::initUndistortRectifyMap(rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients, R2, P2, rightCamera.imageSize, CV_32F, map2x, map2y);
 
         // Done Rectification
         isReady = true;
@@ -216,8 +231,8 @@ namespace ofxCv {
         Mat img2 = toCv(rightImage);
 
         Mat imgL, imgR;
-        remap(img1, imgL, map1x, map1y, INTER_LINEAR, BORDER_CONSTANT, Scalar());
-        remap(img2, imgR, map2x, map2y, INTER_LINEAR, BORDER_CONSTANT, Scalar());
+        cv::remap(img1, imgL, map1x, map1y, INTER_LINEAR, BORDER_CONSTANT, Scalar());
+        cv::remap(img2, imgR, map2x, map2y, INTER_LINEAR, BORDER_CONSTANT, Scalar());
 
         ofPixels pixelsL;
         toOf(imgL, pixelsL);
