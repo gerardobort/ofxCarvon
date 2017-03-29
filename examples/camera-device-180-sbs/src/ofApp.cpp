@@ -46,11 +46,11 @@ void ofApp::setup(){
     paramsView.add(*_viewHalfSphere->getParametersReference());
 
     paramsStereo.setName("stereo");
+    paramsStereo.add(swapCameras.set("swapCameras", false));
     paramsStereo.add(indexSample.set("indexSample", 0, 0, NUM_CALIBRATION_SAMPLES -1));
     paramsStereo.add(calibrateStereo.set("calibrateStereo", true));
     paramsStereo.add(showStereoRectification.set("showStereoRectification", true));
     paramsStereo.add(viewStereo.set("viewStereo", false));
-    paramsStereo.add(swapCameras.set("swapCameras", false));
     paramsStereo.add(nDisparities.set("nDisparities", 1, 1, 40));
     nDisparities.addListener(this, &ofApp::reloadStereoN);
     paramsStereo.add(windowSize.set("windowSize", 1, 1, 100));

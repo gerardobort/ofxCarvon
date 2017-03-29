@@ -55,7 +55,7 @@ namespace ofxCv {
 	void Camera::calibrate(){
         int flags = CV_CALIB_FIX_K4|CV_CALIB_FIX_K5;
         double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
-        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 0.5, imageSize, 0, true);
+        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, true);
 
         std::cout << "RMS: " << rms << std::endl;
         std::cout << "Distortion coefficients: " << distortionCoefficients << std::endl;
@@ -221,6 +221,35 @@ namespace ofxCv {
         // Applying Undistort
         cv::initUndistortRectifyMap(leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients, R1, P1, leftCamera.imageSize, CV_32F, map1x, map1y);
         cv::initUndistortRectifyMap(rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients, R2, P2, rightCamera.imageSize, CV_32F, map2x, map2y);
+
+
+
+        /*
+            // This commented out code replaces the exisintg method by making stereoRectify better than individual rectify calls, but in general yields worst results because of unknown results... in theory should be better.
+        Mat CM1 = Mat(3, 3, CV_64FC1);
+        Mat CM2 = Mat(3, 3, CV_64FC1);
+        Mat D1, D2;
+        double res = cv::stereoCalibrate(
+            leftCamera.objectPoints,
+            leftCamera.imagePoints, rightCamera.imagePoints,
+            CM1, D1,
+            CM2, D2,
+            leftCamera.imageSize,
+            // output matrices
+            R, T, E, F,
+            cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5), 
+            CV_CALIB_SAME_FOCAL_LENGTH | CV_CALIB_ZERO_TANGENT_DIST | CV_CALIB_FIX_PRINCIPAL_POINT);
+
+        // Starting Rectification
+        stereoRectify(
+            CM1, D1, CM2, D2,
+            leftCamera.imageSize, R, T,
+            R1, R2, P1, P2, Q, 0); // see alpha param
+
+        // Applying Undistort
+        cv::initUndistortRectifyMap(CM1, D1, R1, P1, leftCamera.imageSize, CV_32FC1, map1x, map1y);
+        cv::initUndistortRectifyMap(CM2, D2, R2, P2, rightCamera.imageSize, CV_32FC1, map2x, map2y);
+        */
 
         // Done Rectification
         isReady = true;
