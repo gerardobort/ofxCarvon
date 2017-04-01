@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofxCv.h"
+#include <opencv2/ocl/ocl.hpp>
 
 namespace ofxCv {
 
@@ -106,10 +107,11 @@ namespace ofxCv {
     private:
         int ndisparities = 16*5; /**< Range of disparity */
         int SADWindowSize = 21; /**< Size of the block window. Must be odd */
-        cv::Mat imgDisparity16S;
-        cv::Mat imgDisparity8U;
+        cv::ocl::oclMat imgDisparity16S;
+        cv::ocl::oclMat imgDisparity8U;
         //cv::Ptr<cv::StereoBM> sbm;
-        cv::Ptr<cv::StereoSGBM> sbm;
+        //cv::Ptr<cv::StereoSGBM> sbm;
+        cv::Ptr<cv::ocl::StereoBM_OCL> sbm;
         
     protected:
 	};

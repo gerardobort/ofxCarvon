@@ -154,16 +154,19 @@ namespace ofxCv {
                 int  speckleRange = 0,
                 bool fullDP = false 
         */
-        sbm = new StereoSGBM(0, ndisparities, SADWindowSize);
+        sbm = new ocl::StereoBM_OCL(ocl::StereoBM_OCL::PREFILTER_XSOBEL, ndisparities, SADWindowSize);
     }
 	
 	//call with two images
 	void Stereo::compute(Mat leftImage, Mat rightImage){
-        imgDisparity16S = Mat(leftImage.rows, leftImage.cols, CV_16S);
-        imgDisparity8U = Mat(leftImage.rows, leftImage.cols, CV_8UC3);
+        imgDisparity16S = ocl::oclMat(leftImage.rows, leftImage.cols, CV_16S);
+        imgDisparity8U = ocl::oclMat(leftImage.rows, leftImage.cols, CV_8UC3);
+
+		ocl::oclMat oclLeftImage = ocl::oclMat(leftImage);
+		ocl::oclMat oclRightImage = ocl::oclMat(rightImage);
 
         //-- 3. Calculate the disparity image
-        sbm->operator()(leftImage, rightImage, imgDisparity16S);
+        sbm->operator()(oclLeftImage, oclRightImage, imgDisparity16S);
 	}
 	
 	void Stereo::draw(){
@@ -174,9 +177,11 @@ namespace ofxCv {
 
         //-- 4. Display it as a CV_8UC1 image
         imgDisparity16S.convertTo(imgDisparity8U, CV_8UC3, (255)/(maxVal - minVal));
+		Mat cvImgDisparity8U;
+		imgDisparity8U.download(cvImgDisparity8U);
 
         ofPixels pix8u;
-        toOf(imgDisparity8U, pix8u);
+        toOf(cvImgDisparity8U, pix8u);
         ofImage img;
         img.setFromPixels(pix8u);
         img.draw(0, 0);
