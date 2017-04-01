@@ -24,6 +24,16 @@ void ofApp::setup(){
     stereobm = new ofxCv::Stereo(16*10, 7);
     leftCamera = new ofxCv::Camera(NUM_CALIBRATION_SAMPLES);
     rightCamera = new ofxCv::Camera(NUM_CALIBRATION_SAMPLES);
+
+	/*
+    leftCamera->distortionCoefficients = (cv::Mat_<double>(5, 1) << 2.714082172979768e-21, 1.281436674111915e-15, 5.13633191351897e-24, 9.435497980549972e-24, -3.029111060774951e-21);
+	leftCamera->cameraMatrix = (cv::Mat_<double>(3, 3) << 1, 0, 5.328585253723798e-30, 0, 1, 2.914335235674356e-30, 0, 0, 1);
+	leftCamera->cameraMatrixRefined = (cv::Mat_<double>(3, 3) << 0.9695592522621155, 0, 4.743571390577924e-18, 0, 0.9689696431159973, 8.419465037473303e-18, 0, 0, 1);
+
+    rightCamera->distortionCoefficients = (cv::Mat_<double>(5, 1) << -1.53305244739114e-20, -5.45402493264424e-15, -3.903892344180897e-23, -5.768942330575815e-23, 1.091696845466223e-20);
+	rightCamera->cameraMatrix = (cv::Mat_<double>(3, 3) << 1, 0, -4.3499539671517e-29, 0, 1, -2.960090426442004e-29, 0, 0, 1);
+	rightCamera->cameraMatrixRefined = (cv::Mat_<double>(3, 3) << 1.026843905448914, 0, -4.466723570661491e-29, 0, 0.9986660480499268, -2.95614190956143e-29, 0, 0, 1);
+	*/
     
     string settingsFile = "settings.xml";
     gui.setup("settings", settingsFile);
@@ -55,6 +65,27 @@ void ofApp::setup(){
     nDisparities.addListener(this, &ofApp::reloadStereoN);
     paramsStereo.add(windowSize.set("windowSize", 1, 1, 100));
     windowSize.addListener(this, &ofApp::reloadStereoS);
+
+    paramsStereo.add(P1.set("P1", 0, 0, 100));
+    P1.addListener(this, &ofApp::reloadStereoP1);
+
+    paramsStereo.add(P2.set("P2", 0, 0, 100));
+    P2.addListener(this, &ofApp::reloadStereoP2);
+
+    paramsStereo.add(disp12MaxDiff.set("disp12MaxDiff", 0, 0, 100));
+    disp12MaxDiff.addListener(this, &ofApp::reloadDisp12MaxDiff);
+
+    paramsStereo.add(preFilterCap.set("preFilterCap", 0, 0, 100));
+    preFilterCap.addListener(this, &ofApp::reloadStereoPrefilterCap);
+
+    paramsStereo.add(uniquenessRatio.set("uniquenessRatio", 0, 0, 100));
+    uniquenessRatio.addListener(this, &ofApp::reloadStereoUniquenessRatio);
+
+    paramsStereo.add(speckleWindowSize.set("speckleWindowSize", 0, 0, 100));
+    speckleWindowSize.addListener(this, &ofApp::reloadSpeckleWindowSize);
+
+    paramsStereo.add(speckleRange.set("speckleRange", 0, 0, 100));
+    speckleRange.addListener(this, &ofApp::reloadSpeckleRange);
 
     gui.add(paramsLeft);
     gui.add(paramsRight);

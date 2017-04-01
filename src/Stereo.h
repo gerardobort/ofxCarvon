@@ -102,10 +102,26 @@ namespace ofxCv {
         void rectify(ofImage& leftImage, ofImage& rightImage);
         bool isReady;
 
-        
+		void setP1(int v) { p1 = v; };
+		void setP2(int v) { p2 = v; };
+		void setDisp12MaxDiff(int v) { disp12MaxDiff = v; };
+		void setPreFilterCap(int v) { preFilterCap = v; };
+		void setUniquenessRatio(int v) { uniquenessRatio = v; };
+		void setSpeckleWindowSize(int v) { speckleWindowSize = v; };
+		void setSpeckleRange(int v) { speckleRange = v; };
+
     private:
         int ndisparities = 16*5; /**< Range of disparity */
         int SADWindowSize = 21; /**< Size of the block window. Must be odd */
+		int p1;
+		int p2;
+		int disp12MaxDiff;
+		int preFilterCap;
+		int uniquenessRatio;
+		int speckleWindowSize;
+		int speckleRange;
+
+
         cv::Mat imgDisparity16S;
         cv::Mat imgDisparity8U;
         //cv::Ptr<cv::StereoBM> sbm;

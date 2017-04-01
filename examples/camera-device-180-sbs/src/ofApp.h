@@ -10,10 +10,10 @@
 #define RECORD_VIDEO_WIDTH 1920
 #define RECORD_VIDEO_HEIGHT 1080
 
-#define VIEWPORT_WIDTH 1280
-#define VIEWPORT_HEIGHT 720
+#define VIEWPORT_WIDTH 640
+#define VIEWPORT_HEIGHT 480
 
-#define NUM_CALIBRATION_SAMPLES 30
+#define NUM_CALIBRATION_SAMPLES 15
 
 class ofApp : public ofBaseApp{
     public:
@@ -41,6 +41,14 @@ class ofApp : public ofBaseApp{
             stereobm->setSADWindowSize(4 + 2*(_value - 1) + 1);
             stereobm->reload();
         }
+
+        void reloadStereoP1(int& _value) { stereobm->setP1(_value); stereobm->reload(); }
+        void reloadStereoP2(int& _value) { stereobm->setP2(_value); stereobm->reload(); }
+        void reloadDisp12MaxDiff(int& _value) { stereobm->setDisp12MaxDiff(_value); stereobm->reload(); }
+        void reloadStereoPrefilterCap(int& _value) { stereobm->setPreFilterCap(_value); stereobm->reload(); }
+        void reloadStereoUniquenessRatio(int& _value) { stereobm->setUniquenessRatio(_value); stereobm->reload(); }
+        void reloadSpeckleWindowSize(int& _value) { stereobm->setSpeckleWindowSize(_value); stereobm->reload(); }
+        void reloadSpeckleRange(int& _value) { stereobm->setSpeckleRange(_value); stereobm->reload(); }
         
     private:
         ofParameterGroup paramsLeft;
@@ -64,6 +72,14 @@ class ofApp : public ofBaseApp{
         ofParameter<bool> viewStereo;
         ofParameter<int> nDisparities;
         ofParameter<int> windowSize;
+
+        ofParameter<int> P1;
+        ofParameter<int> P2;
+        ofParameter<int> disp12MaxDiff;
+        ofParameter<int> preFilterCap;
+        ofParameter<int> uniquenessRatio;
+        ofParameter<int> speckleWindowSize;
+        ofParameter<int> speckleRange;
 
         ofFbo sourceCanvas;
         ofFbo sphericalCanvas;

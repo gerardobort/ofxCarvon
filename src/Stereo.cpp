@@ -154,7 +154,20 @@ namespace ofxCv {
                 int  speckleRange = 0,
                 bool fullDP = false 
         */
-        sbm = new StereoSGBM(0, ndisparities, SADWindowSize);
+		// http://docs.opencv.org/trunk/d2/d85/classcv_1_1StereoSGBM.html
+        sbm = new StereoSGBM(
+			0,
+			ndisparities,
+			SADWindowSize,
+			p1,	// int	P1 = 0,
+			p2,	// int	P2 = 0,
+			disp12MaxDiff,	// int	disp12MaxDiff = 0,
+			preFilterCap,	// int	preFilterCap = 0,
+			uniquenessRatio,	// int	uniquenessRatio = 0,
+			speckleWindowSize,	// int	speckleWindowSize = 0,
+			speckleRange,	// int	speckleRange = 0,
+			1	// MODE_HH // int	mode = StereoSGBM::MODE_SGBM 
+		);
     }
 	
 	//call with two images
