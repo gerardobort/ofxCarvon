@@ -139,6 +139,7 @@ namespace ofxCv {
                 int  numDisparities,
                 int  SADWindowSize
         */
+        // slow for real-time, uses cpu
         // sbm = new StereoBM(StereoBM::PREFILTER_XSOBEL, ndisparities, SADWindowSize);
         /*
             StereoSGBM
@@ -153,8 +154,44 @@ namespace ofxCv {
                 int  speckleWindowSize = 0,
                 int  speckleRange = 0,
                 bool fullDP = false 
+        // slow for real-time, uses cpu
         */
+
+
         sbm = new ocl::StereoBM_OCL(ocl::StereoBM_OCL::BASIC_PRESET, ndisparities, SADWindowSize);
+
+        /*
+            int ndisp – Number of disparities.
+            int iters – Number of BP iterations on each level.
+            int levels – Number of levels.
+            [
+            float max_data_term – Threshold for data cost truncation.
+            float data_weight – Data weight.
+            float max_disc_term – Threshold for discontinuity truncation.
+            float disc_single_jump – Discontinuity single jump.
+            int msg_type – Type for messages. CV_16SC1 and CV_32FC1 types are supported.
+            ]
+         */
+        // too slow for real-time
+        //sbm = new ocl::StereoBeliefPropagation(ndisparities, SADWindowSize, 8,    1, 1, 1, 1, CV_16S);
+
+        /*
+            int ndisp – Number of disparities.
+            int iters – Number of BP iterations on each level.
+            int levels – Number of levels.
+            int nr_plane – Number of disparity levels on the first level.
+            [
+            float max_data_term – Truncation of data cost.
+            float data_weight – Data weight.
+            float max_disc_term – Truncation of discontinuity.
+            float disc_single_jump – Discontinuity single jump.
+            int min_disp_th – Minimal disparity threshold.
+            ]
+            int msg_type – Type for messages. CV_16SC1 and CV_32FC1 types are supported.
+
+         */
+        // too slow for real-time
+        //sbm = new ocl::StereoConstantSpaceBP(ndisparities, 16, 1, 16, CV_16S);
     }
 	
 	//call with two images

@@ -26,16 +26,20 @@ void viewPointCloud::update(){
 	}
 
 	mesh.clear();
-	int index, depth;
+	int index;
+    float depth;
+    float cx = w/2, cy = h/2, dmax = sqrt( cx*cx + cy*cy ), radialZCoeficient;
     for (int y = 0; y+step < h; y += step) {
         for (int x = 0; x+step < w; x += step) {
 			index = y*w + x;
 			depth = depthPixels[4*index];
             if (depth > 0) {
+
+                radialZCoeficient = -4*255*(1-sqrt( (x-cx)*(x-cx) + (y-cy)*(y-cy) )/dmax);
+
                 if (nearThreshold > depth && depth > farThreshold) {
                     mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));
-                    //mesh.addColor(ofColor(255, 0, 0));
-                    mesh.addVertex(ofVec3f(x*dispersion, y*dispersion, depth*zScale));
+                    mesh.addVertex(ofVec3f(x*dispersion, y*dispersion, (depth + radialZCoeficient)*zScale));
                 }
             }
         }
@@ -50,6 +54,8 @@ void viewPointCloud::draw(){
 
     glPointSize(1);
     ofPushMatrix();
+        sCam.begin();
+		ofRotate(180);
 		//ofScale(1, 1, -1);
 		ofTranslate(pos->x*dispersion, pos->y*dispersion, pos->z*zScale);
 		glEnable(GL_DEPTH_TEST);
@@ -58,8 +64,8 @@ void viewPointCloud::draw(){
 		} else {
 			mesh.drawVertices();
 		}
-		mesh.drawVertices();
 		glDisable(GL_DEPTH_TEST);
+        sCam.end();
     ofPopMatrix();
 }
 

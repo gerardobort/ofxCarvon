@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "view.h"
+#include <cmath>
 
 class viewPointCloud: public view {
     public:
@@ -22,6 +23,7 @@ class viewPointCloud: public view {
 		ofFbo* depthFbo;
 		ofImage* colorImage;
         ofMesh mesh;
+        ofEasyCam sCam;
 
         ofParameter<int> step;
         ofParameter<float> zScale;

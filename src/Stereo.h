@@ -112,6 +112,8 @@ namespace ofxCv {
         //cv::Ptr<cv::StereoBM> sbm;
         //cv::Ptr<cv::StereoSGBM> sbm;
         cv::Ptr<cv::ocl::StereoBM_OCL> sbm;
+        //cv::Ptr<cv::ocl::StereoBeliefPropagation> sbm;
+        //cv::Ptr<cv::ocl::StereoConstantSpaceBP> sbm;
         
     protected:
 	};
