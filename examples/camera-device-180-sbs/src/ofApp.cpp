@@ -19,6 +19,7 @@ void ofApp::setup(){
     _debuggerFisheye = new debuggerFisheye(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "debugger fisheye");
     _transformerSphereTexture = new transformerSphereTexture(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "sphere texture");
     _viewHalfSphere = new viewHalfSphere(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "viewport", RECORD_VIDEO_HEIGHT);
+    _viewPointCloud = new viewPointCloud(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "pointcloud");
 
     indexSample = 0;
     stereobm = new ofxCv::Stereo(16*10, 7);
@@ -44,6 +45,7 @@ void ofApp::setup(){
     paramsView.add(*_debuggerFisheye->getParametersReference());
     paramsView.add(*_transformerSphereTexture->getParametersReference());
     paramsView.add(*_viewHalfSphere->getParametersReference());
+    paramsView.add(*_viewPointCloud->getParametersReference());
 
     paramsStereo.setName("stereo");
     paramsStereo.add(swapCameras.set("swapCameras", false));
@@ -51,6 +53,7 @@ void ofApp::setup(){
     paramsStereo.add(calibrateStereo.set("calibrateStereo", true));
     paramsStereo.add(showStereoRectification.set("showStereoRectification", true));
     paramsStereo.add(viewStereo.set("viewStereo", false));
+    paramsStereo.add(viewMesh.set("viewMesh", false));
     paramsStereo.add(nDisparities.set("nDisparities", 1, 1, 40));
     nDisparities.addListener(this, &ofApp::reloadStereoN);
     paramsStereo.add(windowSize.set("windowSize", 1, 1, 100));
@@ -74,9 +77,12 @@ void ofApp::setup(){
     sphericalCanvas.allocate(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, GL_RGBA);
     // viewportCanvas helps to positionate the resulting output into the screen.
     viewportCanvas.allocate(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GL_RGBA);
+    depthMap.allocate(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GL_RGBA);
 
     leftImage.load("left.png");
     rightImage.load("right.png");
+
+	ofEnableSmoothing();
 }
 
 //--------------------------------------------------------------
@@ -210,11 +216,23 @@ void ofApp::draw(){
     if (!calibrate) {
         ofEnableAlphaBlending();
         if (viewStereo) {
-            stereobm->compute(leftImage, rightImage);
-            viewportCanvas.begin();
-                stereobm->draw();
-            viewportCanvas.end();
-            viewportCanvas.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+			colorMap.clone(leftImage);
+            stereobm->compute(leftImage, rightImage); // converts the images into grayscale
+			if (viewMesh) {
+				depthMap.begin();
+					stereobm->draw();
+				depthMap.end();
+				_viewPointCloud->setInput(&depthMap, &colorMap);
+				_viewPointCloud->update();
+				viewportCanvas.begin();
+					_viewPointCloud->draw();
+				viewportCanvas.end();
+			} else {
+				viewportCanvas.begin();
+					stereobm->draw();
+				viewportCanvas.end();
+			}
+			viewportCanvas.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
         } else {
             viewportCanvas.begin();
                 ofClear(0);

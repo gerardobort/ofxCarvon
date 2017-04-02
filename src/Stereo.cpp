@@ -154,7 +154,7 @@ namespace ofxCv {
                 int  speckleRange = 0,
                 bool fullDP = false 
         */
-        sbm = new ocl::StereoBM_OCL(ocl::StereoBM_OCL::PREFILTER_XSOBEL, ndisparities, SADWindowSize);
+        sbm = new ocl::StereoBM_OCL(ocl::StereoBM_OCL::BASIC_PRESET, ndisparities, SADWindowSize);
     }
 	
 	//call with two images

@@ -11,3 +11,4 @@
 #include "viewHalfSphere.h"
 #include "ofxVideoRecorder.h"
 #include "Stereo.h"
+#include "viewPointCloud.h"

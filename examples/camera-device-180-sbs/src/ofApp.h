@@ -10,10 +10,10 @@
 #define RECORD_VIDEO_WIDTH 1920
 #define RECORD_VIDEO_HEIGHT 1080
 
-#define VIEWPORT_WIDTH 1280
-#define VIEWPORT_HEIGHT 720
+#define VIEWPORT_WIDTH 640
+#define VIEWPORT_HEIGHT 480
 
-#define NUM_CALIBRATION_SAMPLES 30
+#define NUM_CALIBRATION_SAMPLES 15
 
 class ofApp : public ofBaseApp{
     public:
@@ -55,6 +55,7 @@ class ofApp : public ofBaseApp{
         debuggerFisheye* _debuggerFisheye;
         transformerSphereTexture* _transformerSphereTexture;
         viewHalfSphere* _viewHalfSphere;
+        viewPointCloud* _viewPointCloud;
 
         ofParameterGroup paramsStereo;
         ofParameter<int> indexSample;
@@ -62,12 +63,15 @@ class ofApp : public ofBaseApp{
         ofParameter<bool> showStereoRectification;
         ofParameter<bool> swapCameras;
         ofParameter<bool> viewStereo;
+        ofParameter<bool> viewMesh;
         ofParameter<int> nDisparities;
         ofParameter<int> windowSize;
 
         ofFbo sourceCanvas;
         ofFbo sphericalCanvas;
         ofFbo viewportCanvas;
+        ofFbo depthMap;
+        ofImage colorMap;
 
         ofxCv::Stereo* stereobm;
         ofxCv::Camera* leftCamera;
