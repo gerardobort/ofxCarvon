@@ -58,6 +58,7 @@ class ofApp : public ofBaseApp{
         viewPointCloud* _viewPointCloud;
 
         ofParameterGroup paramsStereo;
+        ofParameter<bool> useFisheyeSource;
         ofParameter<int> indexSample;
         ofParameter<bool> calibrateStereo;
         ofParameter<bool> showStereoRectification;

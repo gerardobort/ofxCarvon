@@ -48,6 +48,7 @@ void ofApp::setup(){
     paramsView.add(*_viewPointCloud->getParametersReference());
 
     paramsStereo.setName("stereo");
+    paramsStereo.add(useFisheyeSource.set("useFisheyeSource", false));
     paramsStereo.add(swapCameras.set("swapCameras", false));
     paramsStereo.add(indexSample.set("indexSample", 0, 0, NUM_CALIBRATION_SAMPLES -1));
     paramsStereo.add(calibrateStereo.set("calibrateStereo", true));
@@ -117,15 +118,21 @@ void ofApp::draw(){
         }
     sourceCanvas.end();
 
-    sphericalCanvas.begin();
-        sourceCanvas.getTexture().bind(); // bind rolled image
-        _transformerSphereTexture->draw(); // generate unrolled squared image, uses last binding
-    sphericalCanvas.end();
+    if (useFisheyeSource) {
+        viewportCanvas.begin();
+            sourceCanvas.draw(0, 0, viewportCanvas.getWidth(), viewportCanvas.getHeight());
+        viewportCanvas.end();
+    } else {
+        sphericalCanvas.begin();
+            sourceCanvas.getTexture().bind(); // bind rolled image
+            _transformerSphereTexture->draw(); // generate unrolled squared image, uses last binding
+        sphericalCanvas.end();
 
-    viewportCanvas.begin();
-        sphericalCanvas.getTextureReference().bind();
-        _viewHalfSphere->draw(); // uses last binding
-    viewportCanvas.end();
+        viewportCanvas.begin();
+            sphericalCanvas.getTextureReference().bind();
+            _viewHalfSphere->draw(); // uses last binding
+        viewportCanvas.end();
+    }
 
     ofPixels pixels;
     viewportCanvas.readToPixels(pixels);
@@ -158,15 +165,21 @@ void ofApp::draw(){
         }
     sourceCanvas.end();
 
-    sphericalCanvas.begin();
-        sourceCanvas.getTexture().bind(); // bind rolled image
-        _transformerSphereTexture->draw(); // generate unrolled squared image, uses last binding
-    sphericalCanvas.end();
+    if (useFisheyeSource) {
+        viewportCanvas.begin();
+            sourceCanvas.draw(0, 0, viewportCanvas.getWidth(), viewportCanvas.getHeight());
+        viewportCanvas.end();
+    } else {
+        sphericalCanvas.begin();
+            sourceCanvas.getTexture().bind(); // bind rolled image
+            _transformerSphereTexture->draw(); // generate unrolled squared image, uses last binding
+        sphericalCanvas.end();
 
-    viewportCanvas.begin();
-        sphericalCanvas.getTextureReference().bind();
-        _viewHalfSphere->draw(); // uses last binding
-    viewportCanvas.end();
+        viewportCanvas.begin();
+            sphericalCanvas.getTextureReference().bind();
+            _viewHalfSphere->draw(); // uses last binding
+        viewportCanvas.end();
+    }
 
     viewportCanvas.readToPixels(pixels);
     if (swapCameras) {
