@@ -62,8 +62,8 @@ namespace ofxCv {
         template <class T>
 		void compute(T& leftImage, T& rightImage) {
             // StereoBM requires CV_8UC1 for both input images, StereoSGBM accepts color inputs
-            // leftImage.setImageType(OF_IMAGE_GRAYSCALE);
-            // rightImage.setImageType(OF_IMAGE_GRAYSCALE);
+            leftImage.setImageType(OF_IMAGE_GRAYSCALE);
+            rightImage.setImageType(OF_IMAGE_GRAYSCALE);
 
             compute(toCv(leftImage), toCv(rightImage));
         }
