@@ -27,8 +27,7 @@ class viewPointCloud: public view {
         ofEasyCam sCam;
 
         ofParameter<int> step;
-        ofParameter<float> zScale;
-        ofParameter<float> dispersion;
+        ofParameter<ofPoint> scale;
         ofParameter<bool> drawWireframe;
         ofParameter<int> nearThreshold;
         ofParameter<int> farThreshold;

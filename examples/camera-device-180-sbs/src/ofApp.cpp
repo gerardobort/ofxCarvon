@@ -83,6 +83,8 @@ void ofApp::setup(){
     leftImage.load("left.png");
     rightImage.load("right.png");
 
+    shaderBlur.load("shaders/blur");
+
 	ofEnableSmoothing();
 }
 
@@ -246,11 +248,15 @@ void ofApp::draw(){
 				ofClear(0);
 				ofBackground(0);
 				sCam.begin();
-					sphericalCanvas.getTextureReference().bind();
-					ofColor(255, 255, 255, 100);
-					_viewHalfSphere->drawMesh();
-					ofColor(255, 255, 255, 255);
+					ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+					//shaderBlur.begin();
+						//shaderBlur.setUniformTexture("u_sampler2d", sourceCanvas.getTextureReference(0), 0);
+						sphericalCanvas.getTextureReference().bind();
+						_viewHalfSphere->drawMesh();
+					//shaderBlur.end();
+
 					_viewPointCloud->drawMesh();
+					ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 				sCam.end();
 				viewportCanvas.end();
 			} else {

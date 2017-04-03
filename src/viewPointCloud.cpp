@@ -39,7 +39,7 @@ void viewPointCloud::update(){
 
                 if (nearThreshold > depth && depth > farThreshold) {
                     mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));
-                    mesh.addVertex(ofVec3f(-x*dispersion, y*dispersion, (depth + radialZCoeficient)*zScale));
+                    mesh.addVertex(ofVec3f(-x*scale->x, y*scale->y, (depth + radialZCoeficient)*scale->z));
                 }
             }
         }
@@ -56,7 +56,7 @@ void viewPointCloud::draw(){
     ofPushMatrix();
         sCam.begin();
 		ofRotate(180);
-		ofTranslate(pos->x*dispersion, pos->y*dispersion, pos->z*zScale);
+		ofTranslate(pos->x*scale->x, pos->y*scale->y, pos->z*scale->z);
 		glEnable(GL_DEPTH_TEST);
 		if (drawWireframe) {
 			mesh.drawWireframe();
@@ -73,7 +73,7 @@ void viewPointCloud::drawMesh(){
     glPointSize(pointSize);
     ofPushMatrix();
 		ofRotate(180);
-		ofTranslate(pos->x*dispersion, pos->y*dispersion, pos->z*zScale);
+		ofTranslate(pos->x*scale->x, pos->y*scale->y, pos->z*scale->z);
 		glEnable(GL_DEPTH_TEST);
 		if (drawWireframe) {
 			mesh.drawWireframe();
@@ -87,8 +87,7 @@ void viewPointCloud::drawMesh(){
 //--------------------------------------------------------------
 void viewPointCloud::setupGui() {
     parameters.add(step.set("step", 1, 1, 20));
-    parameters.add(zScale.set("zScale", 10, 0, 60));
-    parameters.add(dispersion.set("dispersion", 1, 1, 20));
+    parameters.add(scale.set("scale", ofPoint(1, 1, 10), ofPoint(-60, -60, -60), ofPoint(60, 60, 60)));
     parameters.add(drawWireframe.set("drawWireframe", false));
     parameters.add(nearThreshold.set("nearThreshold", 255, 0, 255));
     parameters.add(farThreshold.set("farThreshold", 0, 0, 255));

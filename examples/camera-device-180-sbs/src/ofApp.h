@@ -74,6 +74,7 @@ class ofApp : public ofBaseApp{
         ofFbo depthMap;
         ofImage colorMap;
 		ofEasyCam sCam;
+		ofShader shaderBlur;
 
         ofxCv::Stereo* stereobm;
         ofxCv::Camera* leftCamera;
