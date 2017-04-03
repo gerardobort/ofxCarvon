@@ -52,6 +52,17 @@ void viewHalfSphere::draw(){
 }
 
 //--------------------------------------------------------------
+void viewHalfSphere::drawMesh(){
+	ofEnableDepthTest();
+	ofPushMatrix();
+		ofScale(-sphereRadius, -sphereRadius, -sphereRadius);
+		ofRotateX(90);
+		sphereDome.drawBackFaces(true, true);
+	ofPopMatrix();
+	ofDisableDepthTest();
+}
+
+//--------------------------------------------------------------
 void viewHalfSphere::keyPressed(int key){
 }
 

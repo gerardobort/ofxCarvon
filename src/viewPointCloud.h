@@ -11,6 +11,7 @@ class viewPointCloud: public view {
 
         void update();
         void draw();
+        void drawMesh();
 
         void setInput(ofFbo* _depthFbo, ofImage* _colorImage) {
             depthFbo = _depthFbo;
@@ -32,4 +33,5 @@ class viewPointCloud: public view {
         ofParameter<int> nearThreshold;
         ofParameter<int> farThreshold;
         ofParameter<ofPoint> pos;
+        ofParameter<int> pointSize;
 };

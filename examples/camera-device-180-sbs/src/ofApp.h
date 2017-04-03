@@ -10,8 +10,8 @@
 #define RECORD_VIDEO_WIDTH 1920
 #define RECORD_VIDEO_HEIGHT 1080
 
-#define VIEWPORT_WIDTH 640
-#define VIEWPORT_HEIGHT 480
+#define VIEWPORT_WIDTH 800
+#define VIEWPORT_HEIGHT 600
 
 #define NUM_CALIBRATION_SAMPLES 15
 
@@ -73,6 +73,7 @@ class ofApp : public ofBaseApp{
         ofFbo viewportCanvas;
         ofFbo depthMap;
         ofImage colorMap;
+		ofEasyCam sCam;
 
         ofxCv::Stereo* stereobm;
         ofxCv::Camera* leftCamera;

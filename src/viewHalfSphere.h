@@ -47,6 +47,7 @@ class viewHalfSphere: public view {
 
         void update();
         void draw();
+        void drawMesh();
         void keyPressed(int key);
 
     private:

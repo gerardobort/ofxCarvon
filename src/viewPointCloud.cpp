@@ -39,7 +39,7 @@ void viewPointCloud::update(){
 
                 if (nearThreshold > depth && depth > farThreshold) {
                     mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));
-                    mesh.addVertex(ofVec3f(x*dispersion, y*dispersion, (depth + radialZCoeficient)*zScale));
+                    mesh.addVertex(ofVec3f(-x*dispersion, y*dispersion, (depth + radialZCoeficient)*zScale));
                 }
             }
         }
@@ -56,7 +56,6 @@ void viewPointCloud::draw(){
     ofPushMatrix();
         sCam.begin();
 		ofRotate(180);
-		//ofScale(1, 1, -1);
 		ofTranslate(pos->x*dispersion, pos->y*dispersion, pos->z*zScale);
 		glEnable(GL_DEPTH_TEST);
 		if (drawWireframe) {
@@ -70,6 +69,22 @@ void viewPointCloud::draw(){
 }
 
 //--------------------------------------------------------------
+void viewPointCloud::drawMesh(){
+    glPointSize(pointSize);
+    ofPushMatrix();
+		ofRotate(180);
+		ofTranslate(pos->x*dispersion, pos->y*dispersion, pos->z*zScale);
+		glEnable(GL_DEPTH_TEST);
+		if (drawWireframe) {
+			mesh.drawWireframe();
+		} else {
+			mesh.drawVertices();
+		}
+		glDisable(GL_DEPTH_TEST);
+    ofPopMatrix();
+}
+
+//--------------------------------------------------------------
 void viewPointCloud::setupGui() {
     parameters.add(step.set("step", 1, 1, 20));
     parameters.add(zScale.set("zScale", 10, 0, 60));
@@ -77,5 +92,6 @@ void viewPointCloud::setupGui() {
     parameters.add(drawWireframe.set("drawWireframe", false));
     parameters.add(nearThreshold.set("nearThreshold", 255, 0, 255));
     parameters.add(farThreshold.set("farThreshold", 0, 0, 255));
-    parameters.add(pos.set("pos", ofPoint(0,0,0), ofPoint(-videoWidth, -videoHeight, -255), ofPoint(videoWidth, videoHeight, 255)));
+    parameters.add(pointSize.set("pointSize", 1, 1, 10));
+    parameters.add(pos.set("pos", ofPoint(0,0,0), 4.0*ofPoint(-videoWidth, -videoHeight, -255), 4.0*ofPoint(videoWidth, videoHeight, 255)));
 }

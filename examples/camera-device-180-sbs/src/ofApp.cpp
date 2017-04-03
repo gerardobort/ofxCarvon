@@ -169,6 +169,11 @@ void ofApp::draw(){
         viewportCanvas.begin();
             sourceCanvas.draw(0, 0, viewportCanvas.getWidth(), viewportCanvas.getHeight());
         viewportCanvas.end();
+
+        sphericalCanvas.begin();
+            sourceCanvas.getTexture().bind(); // bind rolled image
+            _transformerSphereTexture->draw(); // generate unrolled squared image, uses last binding
+        sphericalCanvas.end();
     } else {
         sphericalCanvas.begin();
             sourceCanvas.getTexture().bind(); // bind rolled image
@@ -238,7 +243,15 @@ void ofApp::draw(){
 				_viewPointCloud->setInput(&depthMap, &colorMap);
 				_viewPointCloud->update();
 				viewportCanvas.begin();
-					_viewPointCloud->draw();
+				ofClear(0);
+				ofBackground(0);
+				sCam.begin();
+					sphericalCanvas.getTextureReference().bind();
+					ofColor(255, 255, 255, 100);
+					_viewHalfSphere->drawMesh();
+					ofColor(255, 255, 255, 255);
+					_viewPointCloud->drawMesh();
+				sCam.end();
 				viewportCanvas.end();
 			} else {
 				viewportCanvas.begin();
