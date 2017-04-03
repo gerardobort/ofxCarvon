@@ -35,7 +35,7 @@ void viewPointCloud::update(){
 			depth = depthPixels[4*index];
             if (depth > 0) {
 
-                radialZCoeficient = -4*255*(1-sqrt( (x-cx)*(x-cx) + (y-cy)*(y-cy) )/dmax);
+                radialZCoeficient = -(1- ( (x-cx)*(x-cx) + (y-cy)*(y-cy) )/dmax);
 
                 if (nearThreshold > depth && depth > farThreshold) {
                     mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));

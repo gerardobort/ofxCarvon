@@ -15,6 +15,6 @@ class transformerStandard: public transformer {
         void setupGui();
 
         ofParameter<ofVec2f> translate;
-        ofParameter<int> rotate;
+        ofParameter<float> rotate;
         ofParameter<ofVec2f> scale;
 };
