@@ -29,17 +29,36 @@ void viewPointCloud::update(){
 	int index;
     float depth;
     float cx = w/2, cy = h/2, dmax = sqrt( cx*cx + cy*cy ), radialZCoeficient;
+    int x1, x2, y1, y2;
     for (int y = 0; y+step < h; y += step) {
         for (int x = 0; x+step < w; x += step) {
 			index = y*w + x;
 			depth = depthPixels[4*index];
-            if (depth > 0) {
 
+            if (depth > 0) {
                 radialZCoeficient = -(1- ( (x-cx)*(x-cx) + (y-cy)*(y-cy) )/dmax);
 
                 if (nearThreshold > depth && depth > farThreshold) {
                     mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));
                     mesh.addVertex(ofVec3f(-x*scale->x, y*scale->y, (depth + radialZCoeficient)*scale->z));
+
+                    if (drawWireframe && x < w-1 && y < h-1) {
+                        x1 = x + step;
+                        y1 = y;
+                        x2 = x;
+                        y2 = y + step;
+
+                        index = y1*w + x1;
+                        depth = depthPixels[4*index];
+                        mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));
+                        mesh.addVertex(ofVec3f(-x1*scale->x, y1*scale->y, (depth + radialZCoeficient)*scale->z));
+
+                        index = y2*w + x2;
+                        depth = depthPixels[4*index];
+                        mesh.addColor(ofColor(colorPixels[4*index], colorPixels[4*index + 1], colorPixels[4*index + 2]));
+                        mesh.addVertex(ofVec3f(-x2*scale->x, y2*scale->y, (depth + radialZCoeficient)*scale->z));
+                    }
+
                 }
             }
         }

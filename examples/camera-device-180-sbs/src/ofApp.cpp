@@ -251,8 +251,8 @@ void ofApp::draw(){
 					ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 					//shaderBlur.begin();
 						//shaderBlur.setUniformTexture("u_sampler2d", sourceCanvas.getTextureReference(0), 0);
-						sphericalCanvas.getTextureReference().bind();
-						_viewHalfSphere->drawMesh();
+						//sphericalCanvas.getTextureReference().bind();
+						//_viewHalfSphere->drawMesh();
 					//shaderBlur.end();
 
 					_viewPointCloud->drawMesh();
