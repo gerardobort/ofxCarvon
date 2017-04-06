@@ -26,7 +26,7 @@ namespace ofxCv {
         tmpImage.setImageType(OF_IMAGE_GRAYSCALE);
         cv::Mat grayscaleImage = toCv(tmpImage);
 
-        boardSize = cv::Size(9,7);
+        boardSize = cv::Size(9, 7);
         imageSize = grayscaleImage.size();
 
         // CALIB_CB_FAST_CHECK saves a lot of time on images
@@ -40,7 +40,7 @@ namespace ofxCv {
             float squareSize = 1.f; // This is "1 arbitrary unit"
             objectPoints[indexSample] = Create3DChessboardCorners(boardSize, squareSize);
 
-            // drawChessboardCorners(image, boardSize, Mat(imagePoints[0]), success);
+            //drawChessboardCorners(grayscaleImage, boardSize, Mat(imagePoints[indexSample]), success);
             // http://programmingexamples.net/wiki/OpenCV/CheckerboardCalibration
 
             corners = toOf(imagePoints[indexSample]);
@@ -54,6 +54,8 @@ namespace ofxCv {
 
 	void Camera::calibrate(){
         int flags = CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
+
+        // TODO depending on flags some parameters must be initialized
         double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
         cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, false);
 
@@ -63,7 +65,7 @@ namespace ofxCv {
         std::cout << "Camera matrix refined: " << cameraMatrixRefined << std::endl;
 
         // helps rectifying faster (expanded method)
-        initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat(), cameraMatrixRefined, imageSize, CV_16SC2, map1, map2);
+        initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat(), cameraMatrixRefined, imageSize, CV_32FC1, mapx, mapy);
     }
 
     void Camera::rectify(ofImage srcImage, ofImage& dstImage) {
@@ -75,8 +77,8 @@ namespace ofxCv {
         // cv::undistort(srcMat, dstMat, cameraMatrixRefined, distortionCoefficients);
 
         // method 2
-        // expanded method (more efficient, requires map1, map2)
-        remap(srcMat, dstMat, map1, map2, INTER_LINEAR);
+        // expanded method (more efficient, requires mapx, mapy)
+        remap(srcMat, dstMat, mapx, mapy, INTER_LINEAR);
 
         // copy resultant matrix into dstImage
         toOf(dstMat, dstImage);
@@ -231,6 +233,7 @@ namespace ofxCv {
             return;
         }
 
+        // TODO depending on flags some parameters must be initialized
         double res = cv::stereoCalibrate(
             leftCamera.objectPoints,
             leftCamera.imagePoints, rightCamera.imagePoints,

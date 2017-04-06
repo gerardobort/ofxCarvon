@@ -38,7 +38,7 @@ namespace ofxCv {
         cv::Mat cameraMatrix;
         cv::Mat cameraMatrixRefined;
 
-        cv::Mat map1, map2;
+        cv::Mat mapx, mapy;
 
         int numSamples;
         bool isReady;
