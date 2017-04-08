@@ -9,4 +9,4 @@ meta:
 common:
 	# requires opencv with opencl support installed
 	USER_CFLAGS = -I/usr/local/include/opencv -I/usr/local/include 
-	USER_LDFLAGS = /usr/local/lib/libopencv_ocl.dylib
+	USER_LDFLAGS = /usr/local/lib/libopencv_calib3d.dylib /usr/local/lib/libopencv_ocl.dylib
