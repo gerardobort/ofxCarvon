@@ -56,7 +56,7 @@ namespace ofxCv {
         int flags = CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
 
         // TODO depending on flags some parameters must be initialized
-        double rms = cv::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
+        double rms = cv::fisheye::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
         cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, false);
 
         std::cout << "RMS: " << rms << std::endl;
@@ -234,7 +234,7 @@ namespace ofxCv {
         }
 
         // TODO depending on flags some parameters must be initialized
-        double res = cv::stereoCalibrate(
+        double res = cv::fisheye::stereoCalibrate(
             leftCamera.objectPoints,
             leftCamera.imagePoints, rightCamera.imagePoints,
             leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients,
@@ -252,7 +252,7 @@ namespace ofxCv {
         std::cout << "F: " << F << std::endl;
 
         // Starting Rectification
-        stereoRectify(
+        cv::fisheye::stereoRectify(
             leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients,
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize, R, T,
