@@ -9,9 +9,9 @@ namespace ofxCv {
     // --------------
 	Camera::Camera(int numSamples): numSamples(numSamples){
         isReady = false;
-        distortionCoefficients = cv::Mat::zeros(8, 1, CV_64F); // There are 8 distortion coefficients
-        cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
-        cameraMatrixRefined = cv::Mat::eye(3, 3, CV_64F);
+        distortionCoefficients = cv::UMat::zeros(8, 1, CV_64F); // There are 8 distortion coefficients
+        cameraMatrix = cv::UMat::eye(3, 3, CV_64F);
+        cameraMatrixRefined = cv::UMat::eye(3, 3, CV_64F);
 
         objectPoints = std::vector<std::vector<cv::Point3f> >(numSamples);
         imagePoints = std::vector<std::vector<cv::Point2f> >(numSamples);
@@ -24,7 +24,7 @@ namespace ofxCv {
         ofImage tmpImage;
         tmpImage.clone(srcImage);
         tmpImage.setImageType(OF_IMAGE_GRAYSCALE);
-        cv::Mat grayscaleImage = toCv(tmpImage);
+        cv::UMat grayscaleImage = toCv(tmpImage);
 
         boardSize = cv::Size(9, 7);
         imageSize = grayscaleImage.size();
@@ -69,8 +69,8 @@ namespace ofxCv {
     }
 
     void Camera::rectify(ofImage srcImage, ofImage& dstImage) {
-        cv::Mat srcMat = toCv(srcImage);
-        cv::Mat dstMat;
+        cv::UMat srcMat = toCv(srcImage);
+        cv::UMat dstMat;
 
         // method 1
         // unexpanded method (less efficient)
@@ -142,7 +142,7 @@ namespace ofxCv {
                 int  SADWindowSize
         */
         // slow for real-time, uses cpu
-        // sbm = new StereoBM(StereoBM::PREFILTER_XSOBEL, ndisparities, SADWindowSize);
+        sbm = new StereoBM(StereoBM::PREFILTER_XSOBEL, ndisparities, SADWindowSize);
         /*
             StereoSGBM
                 int  minDisparity,
@@ -160,7 +160,7 @@ namespace ofxCv {
         */
 
 
-        sbm = new ocl::StereoBM_OCL(ocl::StereoBM_OCL::BASIC_PRESET, ndisparities, SADWindowSize);
+        //sbm = new ocl::StereoBM_OCL(ocl::StereoBM_OCL::BASIC_PRESET, ndisparities, SADWindowSize);
 
         /*
             int ndisp – Number of disparities.
@@ -198,11 +198,11 @@ namespace ofxCv {
 	
 	//call with two images
 	void Stereo::compute(Mat leftImage, Mat rightImage){
-        imgDisparity16S = ocl::oclMat(leftImage.rows, leftImage.cols, CV_16S);
-        imgDisparity8U = ocl::oclMat(leftImage.rows, leftImage.cols, CV_8UC3);
+        imgDisparity16S = UMat(leftImage.rows, leftImage.cols, CV_16S);
+        imgDisparity8U = UMat(leftImage.rows, leftImage.cols, CV_8UC3);
 
-		ocl::oclMat oclLeftImage = ocl::oclMat(leftImage);
-		ocl::oclMat oclRightImage = ocl::oclMat(rightImage);
+		UMat oclLeftImage = UMat(leftImage);
+		UMat oclRightImage = UMat(rightImage);
 
         //-- 3. Calculate the disparity image
         sbm->operator()(oclLeftImage, oclRightImage, imgDisparity16S);
@@ -320,8 +320,8 @@ namespace ofxCv {
 
 
     void Stereo::rectifyLeft(ofImage& leftImage) {
-        cv::Mat src = toCv(leftImage);
-        cv::Mat dst = Mat::zeros(src.rows, src.cols, src.type());
+        cv::UMat src = toCv(leftImage);
+        cv::UMat dst = Mat::zeros(src.rows, src.cols, src.type());
         // http://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/warp_affine/warp_affine.html
         Mat A = (Mat_<double>(3, 2) << 1, 1,   0, 1,   1, 0);
         Mat B(3, 2, CV_32F);
@@ -332,10 +332,10 @@ namespace ofxCv {
         A.assignTo(A1, CV_32FC1);
         B.assignTo(B1, CV_32FC1);
 
-        cv::Mat left2Right = getAffineTransform(A1, B1);
+        cv::UMat left2Right = getAffineTransform(A1, B1);
         std::cout << "left2Right: " << left2Right << std::endl;
 
-        //cv::Mat rot_mat = getRotationMatrix2D(Point2f(src.cols/2.0, src.rows/2.0), 90, 1.2);
+        //cv::UMat rot_mat = getRotationMatrix2D(Point2f(src.cols/2.0, src.rows/2.0), 90, 1.2);
         //cv::warpAffine(src, dst, rot_mat, dst.size());
         cv::warpAffine(src, dst, left2Right, dst.size());
         

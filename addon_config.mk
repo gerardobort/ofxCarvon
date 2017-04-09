@@ -9,4 +9,15 @@ meta:
 common:
 	# requires opencv with opencl support installed
 	USER_CFLAGS = -I/usr/local/include/opencv -I/usr/local/include 
-	USER_LDFLAGS = /usr/local/lib/libopencv_calib3d.dylib /usr/local/lib/libopencv_ocl.dylib
+    USER_LDFLAGS = -L/usr/local/opt/opencv3/lib
+    USER_CPPFLAGS = -I/usr/local/opt/opencv3/include
+    PKG_CONFIG_PATH = /usr/local/opt/opencv3/lib/pkgconfig
+
+    #ADDON_INCLUDES = libs
+    #ADDON_INCLUDES += src
+    ADDON_SOURCES = $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.cpp
+    ADDON_SOURCES += $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.h
+    ADDON_LIBS_EXCLUDE = libs/opencv
+    ADDON_LIBS_EXCLUDE += libs/opencv/%
+    ADDON_INCLUDES_EXCLUDE = libs/opencv
+    ADDON_INCLUDES_EXCLUDE += libs/opencv/%
