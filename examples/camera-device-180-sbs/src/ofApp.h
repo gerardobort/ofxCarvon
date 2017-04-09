@@ -1,5 +1,7 @@
 #pragma once
 
+#include <opencv2/opencv.hpp>
+
 #define ASSETS_PATH "../../../../assets/"
 
 #include "ofMain.h"

@@ -13,8 +13,8 @@ common:
     USER_CPPFLAGS = -I/usr/local/opt/opencv3/include
     PKG_CONFIG_PATH = /usr/local/opt/opencv3/lib/pkgconfig
 
-    #ADDON_INCLUDES = libs
-    #ADDON_INCLUDES += src
+    ADDON_INCLUDES = libs
+    ADDON_INCLUDES += src
     ADDON_SOURCES = $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.cpp
     ADDON_SOURCES += $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.h
     ADDON_LIBS_EXCLUDE = libs/opencv
