@@ -7,16 +7,20 @@ meta:
 
 
 common:
+
+    # added to openFrameworks/libs/boost/include/boost/filesystem.hpp
+    # #include <opencv2/opencv.hpp>
+
 	# requires opencv with opencl support installed
 	USER_CFLAGS = -I/usr/local/include/opencv -I/usr/local/include 
     USER_LDFLAGS = -L/usr/local/opt/opencv3/lib
     USER_CPPFLAGS = -I/usr/local/opt/opencv3/include
     PKG_CONFIG_PATH = /usr/local/opt/opencv3/lib/pkgconfig
 
-    ADDON_INCLUDES = libs
-    ADDON_INCLUDES += src
-    ADDON_SOURCES = $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.cpp
-    ADDON_SOURCES += $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.h
+    #ADDON_INCLUDES = libs
+    #ADDON_INCLUDES += src
+    #ADDON_SOURCES = $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.cpp
+    #ADDON_SOURCES += $(OF_ROOT)/addons/ofxCarvon/src/ofxCarvon.h
     ADDON_LIBS_EXCLUDE = libs/opencv
     ADDON_LIBS_EXCLUDE += libs/opencv/%
     ADDON_INCLUDES_EXCLUDE = libs/opencv

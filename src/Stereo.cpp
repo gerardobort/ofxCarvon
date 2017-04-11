@@ -56,7 +56,7 @@ namespace ofxCv {
         int flags = CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
 
         // TODO depending on flags some parameters must be initialized
-        double rms = cv::fisheye::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
+        double rms = cv::fisheye::calibrate(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
         cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, false);
 
         std::cout << "RMS: " << rms << std::endl;
@@ -142,7 +142,7 @@ namespace ofxCv {
                 int  SADWindowSize
         */
         // slow for real-time, uses cpu
-        sbm = new StereoBM(StereoBM::PREFILTER_XSOBEL, ndisparities, SADWindowSize);
+        sbm = StereoBM::create(ndisparities, SADWindowSize);
         /*
             StereoSGBM
                 int  minDisparity,
@@ -205,7 +205,7 @@ namespace ofxCv {
 		Mat oclRightImage = Mat(rightImage);
 
         //-- 3. Calculate the disparity image
-        sbm->operator()(oclLeftImage, oclRightImage, imgDisparity16S);
+        sbm->compute(oclLeftImage, oclRightImage, imgDisparity16S);
 	}
 	
 	void Stereo::draw(){
@@ -216,11 +216,12 @@ namespace ofxCv {
 
         //-- 4. Display it as a CV_8UC1 image
         imgDisparity16S.convertTo(imgDisparity8U, CV_8UC3, (255)/(maxVal - minVal));
-		Mat cvImgDisparity8U;
-		imgDisparity8U.download(cvImgDisparity8U);
+		//Mat cvImgDisparity8U;
+		//imgDisparity8U.download(cvImgDisparity8U);
 
         ofPixels pix8u;
-        toOf(cvImgDisparity8U, pix8u);
+        //toOf(cvImgDisparity8U, pix8u);
+        toOf(imgDisparity8U, pix8u);
         ofImage img;
         img.setFromPixels(pix8u);
         img.draw(0, 0);
@@ -234,16 +235,17 @@ namespace ofxCv {
         }
 
         // TODO depending on flags some parameters must be initialized
-        double res = cv::fisheye::stereoCalibrate(
+        double res = fisheye::stereoCalibrate(
             leftCamera.objectPoints,
             leftCamera.imagePoints, rightCamera.imagePoints,
             leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients,
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize,
             // output matrices
-            R, T, E, F,
-            TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5),
-            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+            R, T, //E, F,
+            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5,
+            TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5)
+            );
             // CV_CALIB_FIX_PRINCIPAL_POINT is key for good results in both stereo or individual calibration
 
         std::cout << "R: " << R << std::endl;
