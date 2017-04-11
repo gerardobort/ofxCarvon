@@ -1,8 +1,11 @@
 #pragma once
 
+#include "cv.h"
+#include "opencv.hpp"
 #include "ofxCv.h"
-#include <opencv2/ocl/ocl.hpp>
-#include <opencv2/calib3d.hpp>
+#include "opencv2/core/core.hpp"
+#include "opencv2/ocl/ocl.hpp"
+#include "opencv2/calib3d/calib3d.hpp"
 
 namespace ofxCv {
 

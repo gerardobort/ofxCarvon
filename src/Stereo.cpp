@@ -56,7 +56,7 @@ namespace ofxCv {
         int flags = CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
 
         // TODO depending on flags some parameters must be initialized
-        double rms = cv::fisheye::calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
+        double rms = cv::fisheye::calibrate(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
         cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, false);
 
         std::cout << "RMS: " << rms << std::endl;
@@ -65,7 +65,7 @@ namespace ofxCv {
         std::cout << "Camera matrix refined: " << cameraMatrixRefined << std::endl;
 
         // helps rectifying faster (expanded method)
-        initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat(), cameraMatrixRefined, imageSize, CV_32FC1, mapx, mapy);
+        cv::fisheye::initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat(), cameraMatrixRefined, imageSize, CV_32FC1, mapx, mapy);
     }
 
     void Camera::rectify(ofImage srcImage, ofImage& dstImage) {
@@ -241,9 +241,9 @@ namespace ofxCv {
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize,
             // output matrices
-            R, T, E, F,
-            TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5),
-            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+            R, T, //E, F,
+            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5,
+            TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5));
             // CV_CALIB_FIX_PRINCIPAL_POINT is key for good results in both stereo or individual calibration
 
         std::cout << "R: " << R << std::endl;
