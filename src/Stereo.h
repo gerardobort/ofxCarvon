@@ -26,7 +26,7 @@ namespace ofxCv {
 
         // chessboard calibration
 	    bool findChessboardCorners(ofImage& srcImage, int indexSample, ofPolyline& corners);
-        vector<cv::Point3f> Create3DChessboardCorners(cv::Size boardSize, float squareSize);
+        vector<cv::Point3d> Create3DChessboardCorners(cv::Size boardSize, float squareSize);
 	    void calibrate();
 
         void rectify(ofImage srcImage, ofImage& dstImage);
@@ -34,8 +34,8 @@ namespace ofxCv {
         // after successful camera calibration the following properties should be all set
         cv::Size imageSize;
         cv::Size boardSize;
-        std::vector<std::vector<cv::Point3f> > objectPoints;
-        std::vector<std::vector<cv::Point2f> > imagePoints;
+        std::vector<std::vector<cv::Point3d> > objectPoints;
+        std::vector<std::vector<cv::Point2d> > imagePoints;
         std::vector<cv::Mat> rotationVectors;
         std::vector<cv::Mat> translationVectors;
         cv::Mat distortionCoefficients;
@@ -85,7 +85,6 @@ namespace ofxCv {
             return toOf(calibrate(toCv(image), success));
         }
 	    vector<cv::Point2f> calibrate(cv::Mat image, bool& success);
-        vector<cv::Point3f> Create3DChessboardCorners(cv::Size boardSize, float squareSize);
 
         /*
         R – Output rotation matrix between the 1st and the 2nd camera coordinate systems.

@@ -9,12 +9,12 @@ namespace ofxCv {
     // --------------
 	Camera::Camera(int numSamples): numSamples(numSamples){
         isReady = false;
-        distortionCoefficients = cv::Mat::zeros(8, 1, CV_64F); // There are 8 distortion coefficients
+        distortionCoefficients = cv::Mat::zeros(4, 1, CV_64F); // There are 4 distortion coefficients in fisheye model (instead of 8)
         cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
         cameraMatrixRefined = cv::Mat::eye(3, 3, CV_64F);
 
-        objectPoints = std::vector<std::vector<cv::Point3f> >(numSamples);
-        imagePoints = std::vector<std::vector<cv::Point2f> >(numSamples);
+        objectPoints = std::vector<std::vector<cv::Point3d> >(numSamples);
+        imagePoints = std::vector<std::vector<cv::Point2d> >(numSamples);
 	}
 	
 	Camera::~Camera(){
@@ -31,11 +31,12 @@ namespace ofxCv {
 
         // CALIB_CB_FAST_CHECK saves a lot of time on images
         // that do not contain any chessboard corners
-        bool success = cv::findChessboardCorners(grayscaleImage, boardSize, imagePoints[indexSample], CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS | CALIB_CB_FAST_CHECK);
+        bool success = cv::findChessboardCorners(grayscaleImage, boardSize, imagePoints[indexSample], CV_CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE | CV_CALIB_CB_FILTER_QUADS | CALIB_CB_FAST_CHECK);
 
         if (success) {
             // call-again for better corner detection
-            cv::cornerSubPix(grayscaleImage, imagePoints[indexSample], cv::Size(11, 11), cv::Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 100, 0.1));
+			// requires imagePoints in Point2f
+            // cv::cornerSubPix(grayscaleImage, imagePoints[indexSample], cv::Size(11, 11), cv::Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 100, 0.1));
 
             float squareSize = 1.f; // This is "1 arbitrary unit"
             objectPoints[indexSample] = Create3DChessboardCorners(boardSize, squareSize);
@@ -53,11 +54,11 @@ namespace ofxCv {
     }
 
 	void Camera::calibrate(){
-        int flags = CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
+        int flags = fisheye::CALIB_CHECK_COND|fisheye::CALIB_FIX_SKEW; // CV_CALIB_FIX_PRINCIPAL_POINT mess everything when centerPrincipalPoint=false
 
         // TODO depending on flags some parameters must be initialized
         double rms = cv::fisheye::calibrate(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rotationVectors, translationVectors, flags);
-        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, false);
+        cameraMatrixRefined = cv::getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1, imageSize, 0, true);
 
         std::cout << "RMS: " << rms << std::endl;
         std::cout << "Distortion coefficients: " << distortionCoefficients << std::endl;
@@ -65,7 +66,8 @@ namespace ofxCv {
         std::cout << "Camera matrix refined: " << cameraMatrixRefined << std::endl;
 
         // helps rectifying faster (expanded method)
-        cv::fisheye::initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat(), cameraMatrixRefined, imageSize, CV_32FC1, mapx, mapy);
+        cv::fisheye::initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat::eye(3, 3, CV_64F), cameraMatrixRefined, imageSize, CV_32F, mapx, mapy);
+        std::cout << "Camera::calibrate() done" << std::endl;
     }
 
     void Camera::rectify(ofImage srcImage, ofImage& dstImage) {
@@ -85,15 +87,15 @@ namespace ofxCv {
         dstImage.setImageType(OF_IMAGE_COLOR);
     }
 
-    std::vector<cv::Point3f> Camera::Create3DChessboardCorners(cv::Size boardSize, float squareSize) {
+    std::vector<cv::Point3d> Camera::Create3DChessboardCorners(cv::Size boardSize, float squareSize) {
         // This function creates the 3D points of your chessboard in its own coordinate system
-        std::vector<cv::Point3f> corners;
+        std::vector<cv::Point3d> corners;
      
         for( int i = 0; i < boardSize.height; i++ )
         {
             for( int j = 0; j < boardSize.width; j++ )
             {
-                corners.push_back(cv::Point3f(float(j*squareSize), float(i*squareSize), 0));
+                corners.push_back(cv::Point3d(float(j*squareSize), float(i*squareSize), 0));
             }
         }
      
@@ -206,6 +208,7 @@ namespace ofxCv {
 
         //-- 3. Calculate the disparity image
         sbm->operator()(oclLeftImage, oclRightImage, imgDisparity16S);
+        std::cout << "Stereo::compute() done" << std::endl;
 	}
 	
 	void Stereo::draw(){
@@ -232,6 +235,7 @@ namespace ofxCv {
             std::cout << "Error: Cameras not ready yet for setero calibration: missing camera calibration" << std::endl;
             return;
         }
+        std::cout << "Stereo::calibrate() stereoCalibrate->starting..." << std::endl;
 
         // TODO depending on flags some parameters must be initialized
         double res = cv::fisheye::stereoCalibrate(
@@ -242,14 +246,18 @@ namespace ofxCv {
             leftCamera.imageSize,
             // output matrices
             R, T, //E, F,
-            CV_CALIB_FIX_INTRINSIC|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_FOCAL_LENGTH|CV_CALIB_ZERO_TANGENT_DIST|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5,
+            //fisheye::CALIB_FIX_INTRINSIC,
+			//fisheye::CALIB_USE_INTRINSIC_GUESS,
+			fisheye::CALIB_FIX_K1|fisheye::CALIB_FIX_K2|fisheye::CALIB_FIX_K3|fisheye::CALIB_FIX_K4,
             TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5));
             // CV_CALIB_FIX_PRINCIPAL_POINT is key for good results in both stereo or individual calibration
 
         std::cout << "R: " << R << std::endl;
         std::cout << "T: " << T << std::endl;
-        std::cout << "E: " << E << std::endl;
-        std::cout << "F: " << F << std::endl;
+        //std::cout << "E: " << E << std::endl;
+        //std::cout << "F: " << F << std::endl;
+
+        std::cout << "Stereo::calibrate() stereoCalibrate->done" << std::endl;
 
         // Starting Rectification
         cv::fisheye::stereoRectify(
@@ -257,6 +265,8 @@ namespace ofxCv {
             rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients,
             leftCamera.imageSize, R, T,
             R1, R2, P1, P2, Q, 0); // see alpha param
+
+        std::cout << "Stereo::calibrate() stereoRectify->done" << std::endl;
 
         std::cout << "R1" << R1 << std::endl;
         std::cout << "R2" << R2 << std::endl;
@@ -268,6 +278,7 @@ namespace ofxCv {
         cv::initUndistortRectifyMap(leftCamera.cameraMatrixRefined, leftCamera.distortionCoefficients, R1, P1, leftCamera.imageSize, CV_32F, map1x, map1y);
         cv::initUndistortRectifyMap(rightCamera.cameraMatrixRefined, rightCamera.distortionCoefficients, R2, P2, rightCamera.imageSize, CV_32F, map2x, map2y);
 
+        std::cout << "Stereo::calibrate() initUndistortRectifyMap->done" << std::endl;
 
 
         /*
@@ -299,6 +310,7 @@ namespace ofxCv {
 
         // Done Rectification
         isReady = true;
+        std::cout << "Stereo::calibrate() done" << std::endl;
     }
 
     void Stereo::rectify(ofImage& leftImage, ofImage& rightImage) {
