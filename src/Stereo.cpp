@@ -8,19 +8,36 @@ namespace ofxCv {
 
     // --------------
 	Camera::Camera(int numSamples): numSamples(numSamples){
-        cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
+        //cameraMatrix = cv::Mat::eye(3, 3, CV_64F);
         //distortionCoefficients = cv::Mat::zeros(4, 1, CV_64F); // There are 4 distortion coefficients in fisheye model (instead of 8)
         //cameraMatrixRefined = cv::Mat::eye(3, 3, CV_64F);
         //isReady = false;
-
-        cv::Vec4d distortionCoefficients (-0.05253035088989154,
-            0.0178404965810402,
-            -0.02042300582855949,
-            0.00569906645236232);
-        cv::Matx33d cameraMatrixRefined(474.3212945105541, 0, 705.0513504484371,
-            0, 275.0504049872702, 406.3380538356614,
-            0, 0, 1);
+        cv::Matx33d cameraMatrix(443.9760827244972, 0, 647.8958956682515,
+          0, 259.9864732380117, 388.1746347022338,
+          0, 0, 1);
+        cv::Vec4d distortionCoefficients (-0.04959317625347989,
+          0.005313175245151469,
+          -0.004160818224412319,
+          0.001018235747365488);
+        cv::Matx33d cameraMatrixRefined(368.5408978148645, 0, 639.5,
+          0, 215.8126349484327, 399.5,
+          0, 0, 1);
         isReady = true;
+        imageSize = cv::Size(1280, 800);
+        cv::fisheye::initUndistortRectifyMap(cameraMatrix, distortionCoefficients, Mat::eye(3, 3, CV_64F), cameraMatrixRefined, imageSize, CV_32F, mapx, mapy);
+/*
+RMS: 0.539341
+Distortion coefficients: [-0.04959317625347989;
+  0.005313175245151469;
+  -0.004160818224412319;
+  0.001018235747365488]
+Camera matrix: [443.9760827244972, 0, 647.8958956682515;
+  0, 259.9864732380117, 388.1746347022338;
+  0, 0, 1]
+Camera matrix refined: [368.5408978148645, 0, 639.5;
+  0, 215.8126349484327, 399.5;
+  0, 0, 1]
+*/
 
         objectPoints = std::vector<std::vector<cv::Point3d> >(numSamples);
         imagePoints = std::vector<std::vector<cv::Point2d> >(numSamples);
@@ -257,7 +274,7 @@ namespace ofxCv {
             leftCamera.imageSize,
             // output matrices
             R, T,
-            0 | fisheye::CALIB_RECOMPUTE_EXTRINSIC | fisheye::CALIB_CHECK_COND | cv::fisheye::CALIB_FIX_SKEW,// | cv::fisheye::CALIB_FIX_INTRINSIC,
+            0 | /*fisheye::CALIB_RECOMPUTE_EXTRINSIC | fisheye::CALIB_CHECK_COND | */cv::fisheye::CALIB_FIX_SKEW,// | cv::fisheye::CALIB_FIX_INTRINSIC,
             cv::TermCriteria(3, 12, 0));
 
         std::cout << "R: " << R << std::endl;
