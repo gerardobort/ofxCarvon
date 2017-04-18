@@ -7,6 +7,9 @@ meta:
 
 
 common:
+    # requires include opencv from external sources on an early stage at openframeworks constants
+    # #include "/usr/local/include/opencv2/opencv.hpp"  --->  ~/Applications/openFrameworks/libs/openFrameworks/utils/ofConstants.h
+
 	# requires opencv with opencl support installed
 	USER_CFLAGS = -I/usr/local/include/opencv -I/usr/local/include 
 	USER_LDFLAGS = /usr/local/lib/libopencv_ocl.dylib
