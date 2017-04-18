@@ -38,7 +38,7 @@ Camera matrix refined: [368.5408978148645, 0, 639.5;
   0, 215.8126349484327, 399.5;
   0, 0, 1]
 */
-
+        // example: https://github.com/opencv/opencv/blob/6df1198e8b1ea4925cbce943a1dc6549f27d8be2/modules/calib3d/test/test_fisheye.cpp
         objectPoints = std::vector<std::vector<cv::Point3d> >(numSamples);
         imagePoints = std::vector<std::vector<cv::Point2d> >(numSamples);
 	}
