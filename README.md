@@ -27,3 +27,8 @@ The project, apart of the OpenFrameworks library, will include some extra tools,
 ### Example
 
 - camera-device-180
+
+# Calibration notes
+
+`OpenCV Error: Assertion failed (svd.w.at<double>(0) / svd.w.at<double>((int)svd.w.total() - 1) < thresh_cond) in CalibrateExtrinsics` appears when the 2 cameras are not in sync
+`OpenCV Error: Assertion failed (abs_max < threshold) in stereoCalibrate` occurs when the RMS of each camera calibration is out of range 0-1

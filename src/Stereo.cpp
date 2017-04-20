@@ -52,7 +52,7 @@ Camera matrix refined: [368.5408978148645, 0, 639.5;
         tmpImage.setImageType(OF_IMAGE_GRAYSCALE);
         cv::Mat grayscaleImage = toCv(tmpImage);
 
-        boardSize = cv::Size(9, 7);
+        boardSize = cv::Size(7, 9);
         imageSize = grayscaleImage.size();
 
         // CALIB_CB_FAST_CHECK saves a lot of time on images
@@ -64,10 +64,10 @@ Camera matrix refined: [368.5408978148645, 0, 639.5;
 			// requires imagePoints in Point2f
             // cv::cornerSubPix(grayscaleImage, imagePoints[indexSample], cv::Size(11, 11), cv::Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 100, 0.1));
 
-            float squareSize = 21.0f; // This is "1 arbitrary unit"
+            float squareSize = 0.21f; // This is "1 arbitrary unit"
             objectPoints[indexSample] = Create3DChessboardCorners(boardSize, squareSize);
 
-            //drawChessboardCorners(grayscaleImage, boardSize, Mat(imagePoints[indexSample]), success);
+            // drawChessboardCorners(grayscaleImage, boardSize, Mat(imagePoints[indexSample]), success);
             // http://programmingexamples.net/wiki/OpenCV/CheckerboardCalibration
 
             corners = toOf(imagePoints[indexSample]);
@@ -84,7 +84,7 @@ Camera matrix refined: [368.5408978148645, 0, 639.5;
         int flags = 0 | cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC | cv::fisheye::CALIB_CHECK_COND | cv::fisheye::CALIB_FIX_SKEW;
 
         // TODO depending on flags some parameters must be initialized
-        double rms = cv::fisheye::calibrate(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, cv::noArray(), cv::noArray(), flags, cv::TermCriteria(3, 20, 1e-6));
+        double rms = cv::fisheye::calibrate(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, cv::noArray(), cv::noArray(), flags, cv::TermCriteria(3, 50, 1e-6));
 
         std::cout << "RMS: " << rms << std::endl;
         std::cout << "Distortion coefficients: " << distortionCoefficients << std::endl;
@@ -275,7 +275,7 @@ Camera matrix refined: [368.5408978148645, 0, 639.5;
             // output matrices
             R, T,
             0 | /*fisheye::CALIB_RECOMPUTE_EXTRINSIC | fisheye::CALIB_CHECK_COND | */cv::fisheye::CALIB_FIX_SKEW,// | cv::fisheye::CALIB_FIX_INTRINSIC,
-            cv::TermCriteria(3, 12, 0));
+            cv::TermCriteria(3, 50, 1e-6));
 
         std::cout << "R: " << R << std::endl;
         std::cout << "T: " << T << std::endl;

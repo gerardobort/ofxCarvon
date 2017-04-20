@@ -275,6 +275,7 @@ void ofApp::draw(){
 
                 if (leftCamera->isReady) {
                     ofSetColor(255, 0, 0, 255);
+                    ofSetColor(255, 255, 255, 255);
                     if (stereobm->isReady) {
                         ofSetColor(255, 255, 255, 255);
                         leftImage.draw(0, 0);
@@ -298,6 +299,7 @@ void ofApp::draw(){
 
                 if (rightCamera->isReady) {
                     ofSetColor(255, 0, 0, 255);
+                    ofSetColor(255, 255, 255, 255);
                     if (stereobm->isReady) {
                         ofSetColor(255, 255, 255, 255);
                         rightImage.draw(0, 0);
