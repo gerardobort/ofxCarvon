@@ -111,6 +111,34 @@ class transformerSphereTexture: public transformer {
                     
                     return ret;
                 }
+
+                vec2 fish2pano(vec2 pfish, vec2 textureSize, float fovFactor)
+                {
+                    vec2 ret;
+                    float theta;
+                    float phi;
+                    float r;
+                    vec3 psph;
+                    
+                    // float FOV = 3.141592654*1.0; // FOV of the fisheye, eg: 180 degrees
+                    float FOV = PI*fovFactor;
+
+                    // Polar angles
+                    theta = 2.0 * PI * (pfish.x / textureSize.x - 0.5); // -pi to pi
+                    phi = PI * (pfish.y / textureSize.y - 0.5);  // -pi/2 to pi/2
+
+                    // Vector in 3D space
+                    psph.x = cos(phi) * sin(theta);
+                    psph.y = cos(phi) * cos(theta);
+                    psph.z = sin(phi);
+                    
+                    // Pixel in pano space
+                    r = textureSize.y * phi / FOV; 
+                    ret.x = 0.5 * textureSize.x + r * cos(theta);
+                    ret.y = 0.5 * textureSize.y + r * sin(theta);
+                    
+                    return ret;
+                }
             );
 
             bInitialized *= shader.setupShaderFromSource(GL_VERTEX_SHADER, vertexShader);
