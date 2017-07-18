@@ -1,6 +1,6 @@
 #pragma once
 
-#define ASSETS_PATH "../../../ofxCarvon/assets/"
+#define ASSETS_PATH "../../../../assets/"
 
 #include "ofMain.h"
 #include "ofxGui.h"
@@ -40,9 +40,11 @@ class ofApp : public ofBaseApp{
         ofParameterGroup paramsView;
         debuggerFisheye* _debuggerFisheye;
         transformerSphereTexture* _transformerSphereTexture;
+        transformerChromaKey* _transformerChromaKey;
         viewHalfSphere* _viewHalfSphere;
 
         ofFbo sourceCanvas;
+        ofFbo chromaCanvas;
         ofFbo sphericalCanvas;
         ofFbo viewportCanvas;
 

@@ -12,6 +12,7 @@ void ofApp::setup(){
 
     _debuggerFisheye = new debuggerFisheye(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "debugger fisheye");
     _transformerSphereTexture = new transformerSphereTexture(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "sphere texture");
+    _transformerChromaKey = new transformerChromaKey(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, "chroma key");
     _viewHalfSphere = new viewHalfSphere(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "viewport", RECORD_VIDEO_HEIGHT);
 
     string settingsFile = "settings.xml";
@@ -25,6 +26,7 @@ void ofApp::setup(){
     paramsSource.setName("video source");
     paramsSource.add(*videoSource->getParametersReference());
     paramsSource.add(*_transformerStandard->getParametersReference());
+    paramsSource.add(*_transformerChromaKey->getParametersReference());
 
     paramsView.setName("view");
     paramsView.add(*_debuggerFisheye->getParametersReference());
@@ -42,6 +44,7 @@ void ofApp::setup(){
 
     // sourceCanvas will contain the trimmed spherical video frames, so the image size should be squared.
     sourceCanvas.allocate(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, GL_RGBA);
+    chromaCanvas.allocate(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, GL_RGBA);
     // sphericalCanvas will contain the texture that will cover the sphere-dome, in this case, due that the sphere-dome is a half-sphere, the texture must be squared.
     sphericalCanvas.allocate(RECORD_VIDEO_HEIGHT, RECORD_VIDEO_HEIGHT, GL_RGBA);
     // viewportCanvas helps to positionate the resulting output into the screen.
@@ -81,8 +84,13 @@ void ofApp::draw(){
         }
     sourceCanvas.end();
 
+	chromaCanvas.begin();
+		sourceCanvas.getTexture().bind(); // bind source
+		_transformerChromaKey->draw(); // generate unrolled squared image, uses last binding
+	chromaCanvas.end();
+
 	sphericalCanvas.begin();
-		sourceCanvas.getTexture().bind(); // bind rolled image
+		chromaCanvas.getTexture().bind(); // bind rolled image
 		_transformerSphereTexture->draw(); // generate unrolled squared image, uses last binding
 	sphericalCanvas.end();
 

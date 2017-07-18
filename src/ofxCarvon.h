@@ -8,6 +8,7 @@
 #include "transformerStandard.h"
 #include "debuggerFisheye.h"
 #include "transformerSphereTexture.h"
+#include "transformerChromaKey.h"
 #include "viewHalfSphere.h"
 #include "ofxVideoRecorder.h"
 #include "Stereo.h"
