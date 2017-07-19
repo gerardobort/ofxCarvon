@@ -55,7 +55,7 @@ void transformerChromaKey::draw(){
 
 //--------------------------------------------------------------
 void transformerChromaKey::setupGui() {
-    parameters.add(colorKey.set("colorKey", ofVec3f(0, 255, 0), ofVec3f(0, 0, 0), ofVec3f(255, 255, 255)));
-    parameters.add(colorReplacement.set("colorReplacement", ofVec3f(0, 0, 255), ofVec3f(0, 0, 0), ofVec3f(255, 255, 255)));
+    parameters.add(colorKey.set("colorKey", ofVec3f(0, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1)));
+    parameters.add(colorReplacement.set("colorReplacement", ofVec3f(0, 0, 1), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1)));
     parameters.add(threshold.set("threshold", 0.5, 0, 1));
 }

@@ -64,7 +64,7 @@ class transformerChromaKey: public transformer {
                 void main()
                 {
                     vec4 videoColor = texture(u_sampler2d, v_texCoord0);
-					if (length(videoColor.rgb - u_colorKey) < 255*u_threshold) {
+					if (length(videoColor.rgb - u_colorKey) < u_threshold) {
 						videoColor = vec4(u_colorReplacement, 1.0);
 					}
 
