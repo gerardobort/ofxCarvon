@@ -33,6 +33,17 @@ transformerChromaKey::transformerChromaKey(int videoWidth, int videoHeight, char
 	mesh.addIndex(0);
 	mesh.addIndex(2);
 	mesh.addIndex(3);
+
+	mask.allocate(videoWidth, videoHeight, GL_RGBA);
+	float i = 0;
+	while (i < TWO_PI) { // make a heart
+		float r = (2-2*sin(i) + sin(i)*sqrt(abs(cos(i))) / (sin(i)+1.4)) * -80;
+		float x = videoWidth/2 + cos(i) * r;
+		float y = videoHeight/2 + sin(i) * r;
+		line.addVertex(ofVec2f(x, y));
+		i += 0.005*HALF_PI*0.5;
+	}
+	line.close(); // close the shape
 }
 
 //--------------------------------------------------------------
@@ -51,6 +62,33 @@ void transformerChromaKey::draw(){
             mesh.draw();
         shader.end();
     ofPopMatrix();
+
+	// draw polyline shape
+	mask.begin();
+		ofSetColor(ofColor::white);
+		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+		ofFill();
+
+		ofBeginShape();
+			ofVertex(0, 0);
+			ofVertex(videoWidth, 0);
+			ofVertex(videoWidth, videoHeight);
+			ofVertex(0, videoHeight);
+		ofEndShape();
+
+		ofEnableBlendMode(OF_BLENDMODE_SUBTRACT);
+		ofBeginShape();
+			vector<ofPoint>& vertices = line.getVertices();
+			for(int j = 0; j < vertices.size(); j++) {
+				ofVertex(vertices[j]);
+			}
+		ofEndShape();
+
+		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+	mask.end();
+
+	ofSetColor(255*colorReplacement->x, 255*colorReplacement->y, 255*colorReplacement->z);
+	mask.draw(0, 0, videoWidth, videoHeight);
 }
 
 //--------------------------------------------------------------

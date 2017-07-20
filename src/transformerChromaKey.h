@@ -91,4 +91,7 @@ class transformerChromaKey: public transformer {
         bool bInitialized;
         string fragmentShader;
         string vertexShader;
+
+		ofFbo mask;
+		ofPolyline line;
 };
