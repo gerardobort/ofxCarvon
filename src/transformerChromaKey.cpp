@@ -52,43 +52,46 @@ void transformerChromaKey::draw(){
     ofBackground(0, 0, 0);
 	ofSetColor(255, 255, 255);
     ofPushMatrix();
-        //ofTranslate(ofPoint(-videoWidth/2.0, 0));
-        //ofScale(ofPoint(2, 1));
-        shader.begin();
-            shader.setUniform3f("u_colorKey", colorKey);
-            shader.setUniform3f("u_colorReplacement", colorReplacement);
-            shader.setUniform1f("u_threshold", threshold);
-            shader.setUniform2i("u_videoSize", videoWidth, videoHeight);
-            mesh.draw();
-        shader.end();
+		shader.begin();
+			shader.setUniform3f("u_colorKey", colorKey);
+			shader.setUniform3f("u_colorReplacement", colorReplacement);
+			shader.setUniform1f("u_threshold", threshold);
+			shader.setUniform2i("u_videoSize", videoWidth, videoHeight);
+			mesh.draw();
+		shader.end();
     ofPopMatrix();
 
 	// draw polyline shape
 	mask.begin();
 		ofSetColor(ofColor::white);
-		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-		ofFill();
-
-		ofBeginShape();
-			ofVertex(0, 0);
-			ofVertex(videoWidth, 0);
-			ofVertex(videoWidth, videoHeight);
-			ofVertex(0, videoHeight);
-		ofEndShape();
+		ofDrawRectangle(0, 0, videoWidth, videoHeight);
 
 		ofEnableBlendMode(OF_BLENDMODE_SUBTRACT);
+		ofFill();
 		ofBeginShape();
 			vector<ofPoint>& vertices = line.getVertices();
-			for(int j = 0; j < vertices.size(); j++) {
+			for (int j = 0; j < vertices.size(); j++) {
 				ofVertex(vertices[j]);
 			}
 		ofEndShape();
-
 		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 	mask.end();
 
-	ofSetColor(255*colorReplacement->x, 255*colorReplacement->y, 255*colorReplacement->z);
-	mask.draw(0, 0, videoWidth, videoHeight);
+    ofPushMatrix();
+		// this is to correct an unexpected horizontal flip, possibly due to left over transformation errors?
+        ofTranslate(ofPoint(0, videoHeight));
+		ofScale(1, -1, 1);
+
+		if (edit) {
+			ofSetColor(255*colorReplacement->x, 255*colorReplacement->y, 255*colorReplacement->z, 100); // allows translucent camera view behind mask
+		} else {
+			ofSetColor(255*colorReplacement->x, 255*colorReplacement->y, 255*colorReplacement->z);
+		}
+		mask.draw(0, 0, videoWidth, videoHeight);
+
+		ofSetColor(ofColor::green);
+		ofDrawCircle(mouseX, mouseY, 6);
+	ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -96,4 +99,32 @@ void transformerChromaKey::setupGui() {
     parameters.add(colorKey.set("colorKey", ofVec3f(0, 1, 0), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1)));
     parameters.add(colorReplacement.set("colorReplacement", ofVec3f(0, 0, 1), ofVec3f(0, 0, 0), ofVec3f(1, 1, 1)));
     parameters.add(threshold.set("threshold", 0.5, 0, 1));
+    parameters.add(edit.set("edit", true));
+}
+
+//--------------------------------------------------------------
+void transformerChromaKey::keyPressed(int key){
+    switch (key) {
+        case 'q':
+			line.clear();
+            break;
+        case 'w':
+			edit = !edit;
+            break;
+        default:
+            break;
+    }
+}
+
+//--------------------------------------------------------------
+void transformerChromaKey::mouseMoved(int x, int y){
+	mouseX = x;
+	mouseY = y;
+}
+
+//--------------------------------------------------------------
+void transformerChromaKey::mousePressed(int x, int y, int button){
+	if (edit) {
+		line.addVertex(ofVec2f(x, y));
+	}
 }

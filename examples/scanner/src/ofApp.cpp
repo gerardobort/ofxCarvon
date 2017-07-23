@@ -68,7 +68,7 @@ void ofApp::draw(){
     ofBackground(0);
     ofSetColor(255, 255, 255);
 
-    int w = ofGetWindowWidth()/2, h = ofGetWindowHeight()/3;
+    int w = ofGetWindowWidth()/2, h = ofGetWindowHeight()/4;
 
     // sourceCanvas purpose is to have the raw video input with some basic transformations applied on it
     // in this example, _transformerStandard let's you adjust displacement, scale, rotation or even mirroring issues caused by the
@@ -108,7 +108,8 @@ void ofApp::draw(){
 		} else {
 			videoSource->draw(0, 0, w, h);
 			sourceCanvas.draw(0, h, w, h);
-			sphericalCanvas.draw(0, 2*h, w, h);
+			chromaCanvas.draw(0, 2*h, w, h);
+			sphericalCanvas.draw(0, 3*h, w, h);
 			viewportCanvas.draw(w, 0, w, h);
 		}
     } else {
@@ -126,6 +127,7 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     _viewHalfSphere->keyPressed(key);
+    _transformerChromaKey->keyPressed(key);
     switch (key) {
         case '.':
             shouldShowSettings = !shouldShowSettings;
@@ -143,7 +145,7 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y){
-    
+	_transformerChromaKey->mouseMoved(x, y);
 }
 
 //--------------------------------------------------------------
@@ -153,7 +155,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-    
+	_transformerChromaKey->mousePressed(x, y, button);
 }
 
 //--------------------------------------------------------------

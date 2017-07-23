@@ -78,15 +78,22 @@ class transformerChromaKey: public transformer {
             bInitialized *= shader.linkProgram();
         }
 
+		void keyPressed(int key);
+        void mouseMoved(int x, int y);
+        void mousePressed(int x, int y, int button);
+
     private:
         void setupGui();
 
         ofShader shader;
         ofMesh mesh;
+		int mouseX;
+		int mouseY;
 
         ofParameter<ofVec3f> colorKey;
         ofParameter<ofVec3f> colorReplacement;
         ofParameter<float> threshold;
+        ofParameter<bool> edit;
 
         bool bInitialized;
         string fragmentShader;
