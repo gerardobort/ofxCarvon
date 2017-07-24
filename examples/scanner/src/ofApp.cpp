@@ -145,7 +145,16 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y){
-	_transformerChromaKey->mouseMoved(x, y);
+	// mapping
+	int x1 = (x/(float)ofGetWindowWidth()) * RECORD_VIDEO_HEIGHT;
+	int y1 = y;
+
+	// mapping2
+	int w = ofGetWindowWidth()/2.0;
+	int h = ofGetWindowHeight()/4.0;
+	int x2 = (x) * RECORD_VIDEO_HEIGHT/w;
+	int y2 = (y - 2.0*h) * RECORD_VIDEO_HEIGHT/h;
+	_transformerChromaKey->mouseMoved(x2, y2);
 }
 
 //--------------------------------------------------------------
@@ -155,7 +164,16 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-	_transformerChromaKey->mousePressed(x, y, button);
+	// mapping
+	int x1 = (x/(float)ofGetWindowWidth()) * RECORD_VIDEO_HEIGHT;
+	int y1 = y;
+
+	// mapping2
+	int w = ofGetWindowWidth()/2.0;
+	int h = ofGetWindowHeight()/4.0;
+	int x2 = (x) * RECORD_VIDEO_HEIGHT/w;
+	int y2 = (y - 2.0*h) * RECORD_VIDEO_HEIGHT/h;
+	_transformerChromaKey->mousePressed(x2, y2, button);
 }
 
 //--------------------------------------------------------------

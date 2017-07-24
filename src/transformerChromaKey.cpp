@@ -35,15 +35,6 @@ transformerChromaKey::transformerChromaKey(int videoWidth, int videoHeight, char
 	mesh.addIndex(3);
 
 	mask.allocate(videoWidth, videoHeight, GL_RGBA);
-	float i = 0;
-	while (i < TWO_PI) { // make a heart
-		float r = (2-2*sin(i) + sin(i)*sqrt(abs(cos(i))) / (sin(i)+1.4)) * -80;
-		float x = videoWidth/2 + cos(i) * r;
-		float y = videoHeight/2 + sin(i) * r;
-		line.addVertex(ofVec2f(x, y));
-		i += 0.005*HALF_PI*0.5;
-	}
-	line.close(); // close the shape
 }
 
 //--------------------------------------------------------------
@@ -89,8 +80,10 @@ void transformerChromaKey::draw(){
 		}
 		mask.draw(0, 0, videoWidth, videoHeight);
 
-		ofSetColor(ofColor::green);
-		ofDrawCircle(mouseX, mouseY, 6);
+		if (edit) {
+			ofSetColor(ofColor::green);
+			ofDrawCircle(mouseX, mouseY, 6);
+		}
 	ofPopMatrix();
 }
 
